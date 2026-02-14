@@ -2,6 +2,16 @@
 
 This document provides a comprehensive overview of the Spring Boot REST API project for effective collaboration with the Gemini CLI.
 
+## Getting Started
+
+To get a local copy up and running, follow these simple steps:
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/Andrei1694/the-party-app.git
+    cd the-party-app
+    ```
+
 ## Project Overview
 
 This is a Java Spring Boot application built with Maven. It provides a simple RESTful service for managing users. The application uses an in-memory H2 database for data persistence and is secured using Spring Security with HTTP Basic authentication.
@@ -28,7 +38,7 @@ The project follows a standard layered architecture common in Spring Boot applic
 -   **`model`**: Contains the `User` entity which represents the data model.
 -   **`config`**: Contains `SecurityConfig` for configuring web security rules.
 
-## Building and Running
+## Building and Running (Backend)
 
 This project uses the Maven wrapper (`mvnw`), so a local Maven installation is not required.
 

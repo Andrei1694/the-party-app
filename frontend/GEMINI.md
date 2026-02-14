@@ -2,6 +2,16 @@
 
 This document provides a comprehensive overview of the React + Vite frontend project for effective collaboration with the Gemini CLI.
 
+## Getting Started
+
+To get a local copy up and running, follow these simple steps:
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/Andrei1694/the-party-app.git
+    cd the-party-app/frontend
+    ```
+
 ## Project Overview
 
 This is a modern frontend web application built with [React](https://react.dev/) and [Vite](https://vitejs.dev/). It leverages `@tanstack/react-query` for efficient data fetching and state management, `axios` for promise-based HTTP client requests, and `react-router-dom` for client-side routing. The project is configured with ESLint for code quality and consistency.
@@ -17,7 +27,7 @@ This is a modern frontend web application built with [React](https://react.dev/)
 -   **Linting:** ESLint
 -   **Authentication:** Custom `AuthContext` and `ProtectedRoute`
 
-## Building and Running
+## Building and Running (Frontend)
 
 This project uses `npm` as its package manager.
 
