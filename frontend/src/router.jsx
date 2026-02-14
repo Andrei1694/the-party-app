@@ -6,7 +6,7 @@ import {
 import App from './App';
 import ProtectedRoute from './auth/ProtectedRoute';
 import Home from './pages/Home';
-import LoginPage from './pages/LoginPage';
+import Login from './pages/Login';
 import Register from './pages/Register';
 import Users from './pages/Users';
 import Profile from './pages/Profile';
@@ -24,7 +24,7 @@ const homeRoute = createRoute({
 const loginRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/login',
-  component: LoginPage,
+  component: Login,
 });
 
 const registerRoute = createRoute({

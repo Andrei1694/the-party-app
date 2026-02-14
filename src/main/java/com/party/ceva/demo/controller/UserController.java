@@ -11,9 +11,14 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.http.ResponseEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import com.party.ceva.demo.service.UserService;
 import com.party.ceva.demo.dto.UserDto;
+import com.party.ceva.demo.dto.UserProfileDto;
 
 @RestController
 @RequestMapping("api/users")
@@ -50,6 +55,25 @@ public class UserController {
 	@PutMapping("/{id}")
 	public UserDto updateUser(@PathVariable Long id, @RequestBody UserDto userDto) {
 		return userService.updateUser(id, userDto);
+	}
+
+	@PutMapping("/{id}/profile")
+	public ResponseEntity<UserDto> updateUserProfile(@PathVariable Long id, @RequestBody UserProfileDto profileDto) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
+			return ResponseEntity.status(401).build();
+		}
+
+		String userEmail;
+		Object principal = authentication.getPrincipal();
+		if (principal instanceof UserDetails userDetails) {
+			userEmail = userDetails.getUsername();
+		} else {
+			userEmail = authentication.getName();
+		}
+
+		UserDto updatedUser = userService.updateUserProfile(id, profileDto, userEmail);
+		return ResponseEntity.ok(updatedUser);
 	}
 
 	@DeleteMapping("/{id}")

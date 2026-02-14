@@ -1,33 +1,40 @@
 package com.party.ceva.demo.service;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.security.crypto.password.PasswordEncoder; // Import this
+import java.time.LocalDateTime;
+import java.util.Optional;
+import java.util.regex.Pattern;
 
+import com.party.ceva.demo.dto.UserDto;
+import com.party.ceva.demo.dto.UserProfileDto;
 import com.party.ceva.demo.model.User;
 import com.party.ceva.demo.model.UserProfile;
 import com.party.ceva.demo.repository.UserRepository;
-import com.party.ceva.demo.dto.UserDto;
-import com.party.ceva.demo.dto.UserProfileDto;
 
-import java.util.Optional;
-import jakarta.transaction.Transactional; // Import Transactional
+import jakarta.transaction.Transactional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class UserService {
 
-	private final UserRepository userRepository;
-	private final PasswordEncoder passwordEncoder; // Inject PasswordEncoder
+	private static final Pattern CNP_PATTERN = Pattern.compile("^\\d{13}$");
 
-	public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) { // Update constructor
+	private final UserRepository userRepository;
+	private final PasswordEncoder passwordEncoder;
+
+	public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
 	}
 
 	public UserDto createUser(UserDto userDto) {
 		User user = toEntity(userDto);
-		user.setPassword(passwordEncoder.encode(userDto.getPassword())); // Encode the password
+		user.setPassword(passwordEncoder.encode(userDto.getPassword()));
 		User savedUser = userRepository.save(user);
 		return toDto(savedUser);
 	}
@@ -66,12 +73,49 @@ public class UserService {
 				userProfile.setTelefon(userDto.getUserProfile().getTelefon());
 				userProfile.setCnp(userDto.getUserProfile().getCnp());
 				userProfile.setSex(userDto.getUserProfile().getSex());
-				userProfile.setUpdatedAt(java.time.LocalDateTime.now()); // Set updated timestamp
+				userProfile.setUpdatedAt(java.time.LocalDateTime.now());
 			} else {
 				user.setUserProfile(null);
 			}
 			return toDto(userRepository.save(user));
-		}).orElseThrow(() -> new RuntimeException("User not found with id " + id)); // Or a custom exception
+		}).orElseThrow(() -> new RuntimeException("User not found with id " + id));
+	}
+
+	@Transactional
+	public UserDto updateUserProfile(Long id, UserProfileDto profileDto, String authenticatedEmail) {
+		User user = userRepository.findById(id)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with id " + id));
+
+		if (authenticatedEmail == null || !user.getEmail().equalsIgnoreCase(authenticatedEmail)) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only update your own profile");
+		}
+
+		validateProfilePayload(profileDto);
+
+		UserProfile userProfile = user.getUserProfile();
+		LocalDateTime now = LocalDateTime.now();
+
+		if (userProfile == null) {
+			userProfile = new UserProfile();
+			userProfile.setCreatedAt(now);
+			user.setUserProfile(userProfile);
+		} else if (userProfile.getCreatedAt() == null) {
+			userProfile.setCreatedAt(now);
+		}
+
+		userProfile.setFirstName(profileDto.getFirstName());
+		userProfile.setLastName(profileDto.getLastName());
+		userProfile.setDateOfBirth(profileDto.getDateOfBirth());
+		userProfile.setAddress(profileDto.getAddress());
+		userProfile.setProfilePictureUrl(profileDto.getProfilePictureUrl());
+		userProfile.setBio(profileDto.getBio());
+		userProfile.setTelefon(profileDto.getTelefon());
+		userProfile.setCnp(normalizeNullable(profileDto.getCnp()));
+		userProfile.setSex(profileDto.getSex());
+		userProfile.setUpdatedAt(now);
+
+		User savedUser = userRepository.save(user);
+		return toDto(savedUser);
 	}
 
 	public void deleteUser(Long id) {
@@ -81,8 +125,7 @@ public class UserService {
 	public UserDto registerUser(UserDto userDto) {
 		User user = new User();
 		user.setEmail(userDto.getEmail());
-		user.setPassword(passwordEncoder.encode(userDto.getPassword())); // Hash the password
-		// Set user profile if available, similar to createUser
+		user.setPassword(passwordEncoder.encode(userDto.getPassword()));
 		User savedUser = userRepository.save(user);
 		return toDto(savedUser);
 	}
@@ -91,7 +134,6 @@ public class UserService {
 		UserDto userDto = new UserDto();
 		userDto.setId(user.getId());
 		userDto.setEmail(user.getEmail());
-		// userDto.setPassword(user.getPassword()); // Do not expose password
 		if (user.getUserProfile() != null) {
 			userDto.setUserProfile(toDto(user.getUserProfile()));
 		}
@@ -119,7 +161,6 @@ public class UserService {
 		User user = new User();
 		user.setId(userDto.getId());
 		user.setEmail(userDto.getEmail());
-		// Password will be encoded in service methods, not here.
 		if (userDto.getUserProfile() != null) {
 			user.setUserProfile(toEntity(userDto.getUserProfile()));
 		}
@@ -141,5 +182,33 @@ public class UserService {
 		userProfile.setCreatedAt(userProfileDto.getCreatedAt());
 		userProfile.setUpdatedAt(userProfileDto.getUpdatedAt());
 		return userProfile;
+	}
+
+	private void validateProfilePayload(UserProfileDto profileDto) {
+		if (profileDto == null) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Profile payload is required");
+		}
+
+		String normalizedCnp = normalizeNullable(profileDto.getCnp());
+		if (normalizedCnp != null && !CNP_PATTERN.matcher(normalizedCnp).matches()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "CNP must contain exactly 13 digits");
+		}
+
+		Character sex = profileDto.getSex();
+		if (sex != null) {
+			char normalizedSex = Character.toUpperCase(sex);
+			if (normalizedSex != 'M' && normalizedSex != 'F' && normalizedSex != 'O') {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sex must be one of M, F, or O");
+			}
+			profileDto.setSex(normalizedSex);
+		}
+	}
+
+	private String normalizeNullable(String value) {
+		if (value == null) {
+			return null;
+		}
+		String normalized = value.trim();
+		return normalized.isEmpty() ? null : normalized;
 	}
 }

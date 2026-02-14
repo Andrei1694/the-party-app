@@ -10,36 +10,6 @@ function App() {
 
   return (
     <div>
-      {/* <nav>
-        <ul>
-          <li>
-            <Link to="/">Home</Link>
-          </li>
-          {user && (
-            <li>
-              <Link to="/users">Users</Link>
-            </li>
-          )}
-          {!user && (
-            <li>
-              <Link to="/login">Login</Link>
-            </li>
-          )}
-          {!user && (
-            <li>
-              <Link to="/register">Register</Link>
-            </li>
-          )}
-          {user && (
-            <li>
-              <button type="button" onClick={onLogout}>
-                Logout
-              </button>
-            </li>
-          )}
-        </ul>
-      </nav> */}
-
       <Outlet />
     </div>
   );

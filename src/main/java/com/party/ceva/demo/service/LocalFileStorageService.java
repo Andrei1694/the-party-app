@@ -10,7 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Objects;
+import java.util.UUID;
 
 @Service
 @ConditionalOnProperty(name = "file.storage.type", havingValue = "local")
@@ -18,8 +18,11 @@ public class LocalFileStorageService implements FileStorageService {
     private final Path fileStorageLocation;
 
     public LocalFileStorageService() {
-        this.fileStorageLocation = Paths.get("./uploads").toAbsolutePath().normalize();
+        this(Paths.get("./uploads"));
+    }
 
+    LocalFileStorageService(Path storagePath) {
+        this.fileStorageLocation = storagePath.toAbsolutePath().normalize();
         try {
             Files.createDirectories(this.fileStorageLocation);
         } catch (Exception ex) {
@@ -27,20 +30,29 @@ public class LocalFileStorageService implements FileStorageService {
         }
     }
 
+    @Override
     public String storeFile(MultipartFile file) {
-        String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
+        String originalFileName = file.getOriginalFilename();
+        String normalizedOriginalFileName = StringUtils.cleanPath(originalFileName == null ? "" : originalFileName);
 
         try {
-            if (fileName.contains("..")) {
-                throw new RuntimeException("Sorry! Filename contains invalid path sequence " + fileName);
+            if (!StringUtils.hasText(normalizedOriginalFileName)) {
+                throw new RuntimeException("File name is missing.");
             }
+
+            if (normalizedOriginalFileName.contains("..")) {
+                throw new RuntimeException("Sorry! Filename contains invalid path sequence " + normalizedOriginalFileName);
+            }
+
+            String extension = StringUtils.getFilenameExtension(normalizedOriginalFileName);
+            String fileName = UUID.randomUUID() + (StringUtils.hasText(extension) ? "." + extension : "");
 
             Path targetLocation = this.fileStorageLocation.resolve(fileName);
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
 
             return fileName;
         } catch (IOException ex) {
-            throw new RuntimeException("Could not store file " + fileName + ". Please try again!", ex);
+            throw new RuntimeException("Could not store file. Please try again!", ex);
         }
     }
 }

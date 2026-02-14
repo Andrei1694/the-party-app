@@ -13,6 +13,10 @@ const api = axios.create({
 
 export const endpoints = {
   users: '/users',
+  usersProfile: (id) => `/users/${id}/profile`,
+  files: {
+    upload: '/files/upload',
+  },
   auth: {
     login: '/auth/login',
     register: '/auth/register',
@@ -22,12 +26,8 @@ export const endpoints = {
 };
 
 export const registerUser = async (userData) => {
-  try {
-    const response = await api.post(endpoints.auth.register, userData);
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
+  const response = await api.post(endpoints.auth.register, userData);
+  return response.data;
 };
 
 export default api;

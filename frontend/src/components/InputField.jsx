@@ -1,7 +1,19 @@
-// src/components/InputField.jsx
 import React from 'react';
 
-const InputField = ({ label, id, name, type, placeholder, icon, value, onChange, showVisibilityToggle, error }) => {
+const InputField = ({
+  label,
+  id,
+  name,
+  type,
+  placeholder,
+  icon,
+  value,
+  onChange,
+  onBlur,
+  showVisibilityToggle,
+  error,
+  ...inputProps
+}) => {
   return (
     <div className="group">
       <label className="block text-sm font-medium text-gray-700 mb-1.5 ml-1" htmlFor={id}>
@@ -21,6 +33,8 @@ const InputField = ({ label, id, name, type, placeholder, icon, value, onChange,
           placeholder={placeholder}
           value={value}
           onChange={onChange}
+          onBlur={onBlur}
+          {...inputProps}
         />
         {showVisibilityToggle && (
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer">

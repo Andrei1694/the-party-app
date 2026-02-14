@@ -1,4 +1,5 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import api, { endpoints } from '../requests';
 
 const AuthContext = createContext(null);
@@ -27,7 +28,7 @@ export const AuthProvider = ({ children }) => {
         setAuthToken(token);
         const { data } = await api.get(endpoints.auth.me);
         setUser(data);
-      } catch (error) {
+      } catch {
         setUser(null);
         localStorage.removeItem(TOKEN_KEY);
         setAuthToken(null);
@@ -39,7 +40,7 @@ export const AuthProvider = ({ children }) => {
     loadMe();
   }, []);
 
-  const login = async (credentials) => {
+  const login = useCallback(async (credentials) => {
     const { data } = await api.post(endpoints.auth.login, credentials);
     setUser(data.user);
     if (data.token) {
@@ -47,19 +48,28 @@ export const AuthProvider = ({ children }) => {
       setAuthToken(data.token);
     }
     return data;
-  };
+  }, []);
 
-  const register = async (payload) => {
+  const register = useCallback(async (payload) => {
     const { data } = await api.post(endpoints.auth.register, payload);
     setUser(data.user);
     return data;
-  };
+  }, []);
 
-  const logout = async () => {
+  const updateProfile = useCallback(async (profilePayload) => {
+    if (!user?.id) {
+      throw new Error('No authenticated user.');
+    }
+    const { data } = await api.put(endpoints.usersProfile(user.id), profilePayload);
+    setUser(data);
+    return data;
+  }, [user?.id]);
+
+  const logout = useCallback(async () => {
     setUser(null);
     localStorage.removeItem(TOKEN_KEY);
     setAuthToken(null);
-  };
+  }, []);
 
   const value = useMemo(
     () => ({
@@ -67,9 +77,10 @@ export const AuthProvider = ({ children }) => {
       isLoading,
       login,
       register,
+      updateProfile,
       logout,
     }),
-    [user, isLoading],
+    [user, isLoading, login, register, updateProfile, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
