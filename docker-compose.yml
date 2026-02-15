@@ -1,5 +1,7 @@
 version: '3.8'
+
 services:
+  # 🐘 Database Service
   postgres:
     image: postgres:13
     container_name: postgres_db
@@ -12,6 +14,14 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  # 🧠 Cache Service
+  redis:
+    image: redis:7-alpine
+    container_name: redis_cache
+    ports:
+      - "6379:6379"
+
+  # ☕ Spring Boot Application
   backend:
     build: .
     container_name: spring-boot-app
@@ -19,11 +29,16 @@ services:
       - "8080:8080"
     depends_on:
       - postgres
+      - redis
     environment:
+      # Database Config
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/mydatabase
       - SPRING_DATASOURCE_USERNAME=user
       - SPRING_DATASOURCE_PASSWORD=password
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      # Redis/Caching Config
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
 
 volumes:
   postgres_data:

@@ -12,6 +12,7 @@ import com.party.ceva.demo.repository.UserRepository;
 
 import jakarta.transaction.Transactional;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -47,7 +48,9 @@ public class UserService {
 		return userRepository.findById(id).map(this::toDto);
 	}
 
+	@Cacheable(value = "users", key = "#email")
 	public Optional<UserDto> findByEmail(String email) {
+		System.out.println("asdas");
 		return userRepository.findByEmail(email).map(this::toDto);
 	}
 

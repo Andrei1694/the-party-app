@@ -20,28 +20,28 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping("/api/news")
 public class NewsController {
 
-    private final NewsService newsService;
+	private final NewsService newsService;
 
-    public NewsController(NewsService newsService) {
-        this.newsService = newsService;
-    }
+	public NewsController(NewsService newsService) {
+		this.newsService = newsService;
+	}
 
-    @PostMapping
-    public ResponseEntity<News> createNews(@RequestBody CreateNewsRequest createNewsRequest) {
-        News createdNews = this.newsService.createNews(createNewsRequest);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdNews);
-    }
+	@PostMapping
+	public ResponseEntity<News> createNews(@RequestBody CreateNewsRequest createNewsRequest) {
+		News createdNews = this.newsService.createNews(createNewsRequest);
+		return ResponseEntity.status(HttpStatus.CREATED).body(createdNews);
+	}
 
-    @GetMapping
-    public Page<News> getAllNews(Pageable pageable) {
-        return this.newsService.findAllNews(pageable);
-    }
+	@GetMapping
+	public Page<News> getAllNews(Pageable pageable) {
+		return this.newsService.findAllNews(pageable);
+	}
 
-    @GetMapping("/news/{id}")
-    public ResponseEntity<News> getNews(@PathVariable Long id) {
-        return newsService.findNewsById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
-    }
+	@GetMapping("/news/{id}")
+	public ResponseEntity<News> getNews(@PathVariable Long id) {
+		return newsService.findNewsById(id)
+				.map(ResponseEntity::ok)
+				.orElseGet(() -> ResponseEntity.notFound().build());
+	}
 
 }

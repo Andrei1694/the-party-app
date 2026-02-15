@@ -1,5 +1,6 @@
 package com.party.ceva.demo.dto;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -10,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserProfileDto {
+public class UserProfileDto implements Serializable {
 	private Long id;
 	private String cnp;
 	private Character sex;
