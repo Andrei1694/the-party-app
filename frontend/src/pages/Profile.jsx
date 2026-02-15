@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useForm, useStore } from '@tanstack/react-form';
-import { useRouter } from '@tanstack/react-router';
 import { useAuth } from '../auth/AuthContext';
 import { useFileUploadService } from '../service/useFileUploadService';
 
@@ -81,7 +80,6 @@ const buildProfileUpdatePayloadFromProfile = (profile, profilePictureUrlOverride
 });
 
 const Profile = () => {
-  const router = useRouter();
   const { user, updateProfile } = useAuth();
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -140,10 +138,6 @@ const Profile = () => {
       ? 'Saving profile picture...'
       : '';
 
-  const handleGoBack = () => {
-    router.history.back();
-  };
-
   const handleProfilePictureUpload = async (event) => {
     const selectedFile = event.target.files?.[0];
     event.target.value = '';
@@ -190,23 +184,10 @@ const Profile = () => {
     'block w-full px-3 py-3 border border-cusens-border rounded-xl leading-5 bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cusens-primary focus:border-cusens-primary sm:text-sm transition duration-200 ease-in-out';
 
   return (
-    <div className="bg-cusens-bg font-display min-h-screen flex items-start justify-center p-4">
+    <div className="bg-cusens-bg font-display flex items-start justify-center">
       <div className="w-full max-w-md bg-cusens-surface rounded-3xl shadow-xl overflow-hidden border border-gray-100 relative flex flex-col">
-        <header className="px-6 py-4 flex items-center justify-between sticky top-0 z-10 bg-cusens-surface/95 backdrop-blur-md">
-          <button
-            className="w-10 h-10 flex items-center justify-center rounded-full active:bg-gray-200 transition-colors text-cusens-primary"
-            onClick={handleGoBack}
-          >
-            <span className="material-icons">chevron_left</span>
-          </button>
-          <h1 className="text-base font-bold leading-tight tracking-tight flex-1 text-center text-gray-900">
-            Profile &amp; Achievements
-          </h1>
-          <div className="w-10"></div>
-        </header>
-
-        <main className="flex-1 overflow-y-auto px-6 pb-24">
-          <div className="flex flex-col items-center gap-4 pt-2">
+        <main className="flex-1 overflow-y-auto px-6 pb-24 pt-6">
+          <div className="flex flex-col items-center gap-4">
             <div
               className="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-28 w-28 shadow-md border-4 border-cusens-primary/15"
               data-alt="User avatar"

@@ -1,10 +1,8 @@
 import React from 'react';
 import { useRouter } from '@tanstack/react-router';
-import { useAuth } from '../auth/AuthContext';
 
 const Profile = () => {
     const router = useRouter();
-    const { user } = useAuth()
     const handleGoBack = () => {
         router.history.back();
     };
