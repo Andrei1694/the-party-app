@@ -1,12 +1,15 @@
 package com.party.ceva.demo.service;
 
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
 import com.party.ceva.demo.dto.CreateNewsRequest;
 import com.party.ceva.demo.model.News;
 import com.party.ceva.demo.repository.NewsRepository;
+
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class NewsService {
@@ -15,7 +18,7 @@ public class NewsService {
     public NewsService(NewsRepository newsRepository) {
         this.newsRepository = newsRepository;
     }
-    
+
     public News createNews(CreateNewsRequest newsRequest) {
         News news = new News();
         news.setTitle(newsRequest.getTitle());
@@ -27,6 +30,8 @@ public class NewsService {
         return this.newsRepository.findAll(pageable);
     }
 
+    public Optional<News> findNewsById(Long id) {
+        return newsRepository.findById(id);
+    }
 
-   
 }

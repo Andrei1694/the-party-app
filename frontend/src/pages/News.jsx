@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from '@tanstack/react-router';
 import api, { endpoints } from '../requests';
 
 const PAGE_SIZE = 20;
@@ -87,17 +88,26 @@ const News = () => {
         )}
 
         {!isLoading && !error && featuredNews && (
-          <article className="rounded-3xl border border-cusens-border bg-white p-6 shadow-sm">
-            <div className="mb-3 inline-flex rounded-full bg-cusens-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-cusens-primary">
-              Featured
-            </div>
-            <h3 className="text-xl font-bold text-gray-900 sm:text-2xl">{featuredNews.title}</h3>
-            <p className="mt-3 text-sm leading-relaxed text-cusens-text-secondary">{getExcerpt(featuredNews.content)}</p>
-            <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-xs font-semibold uppercase tracking-wide text-cusens-text-secondary">
-              <span>Article #{featuredNews.id}</span>
-              <span>Backend Feed</span>
-            </div>
-          </article>
+          <Link
+            to="/news/$newsId"
+            params={{ newsId: String(featuredNews.id) }}
+            className="group block rounded-3xl border border-cusens-border bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+          >
+            <article>
+              <div className="mb-3 inline-flex rounded-full bg-cusens-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-cusens-primary">
+                Featured
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 sm:text-2xl group-hover:text-cusens-primary">
+                {featuredNews.title}
+              </h3>
+              <p className="mt-3 text-sm leading-relaxed text-cusens-text-secondary">{getExcerpt(featuredNews.content)}</p>
+              <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-xs font-semibold uppercase tracking-wide text-cusens-text-secondary">
+                <span>Article #{featuredNews.id}</span>
+                <span>Backend Feed</span>
+              </div>
+              <p className="mt-4 text-sm font-semibold text-cusens-primary">Read full article</p>
+            </article>
+          </Link>
         )}
 
         {!isLoading && !error && data.length === 0 && (
@@ -109,14 +119,22 @@ const News = () => {
         {!isLoading && !error && newsList.length > 0 && (
           <div className="grid gap-4 md:grid-cols-2">
             {newsList.map((item) => (
-              <article key={item.id} className="rounded-2xl border border-cusens-border bg-white p-5 shadow-sm">
-                <div className="mb-3 flex items-center justify-between gap-2 text-xs font-semibold uppercase tracking-wide text-cusens-text-secondary">
-                  <span>Article #{item.id}</span>
-                  <span>Backend Feed</span>
-                </div>
-                <h4 className="text-lg font-bold text-gray-900">{item.title}</h4>
-                <p className="mt-2 text-sm leading-relaxed text-cusens-text-secondary">{getExcerpt(item.content)}</p>
-              </article>
+              <Link
+                key={item.id}
+                to="/news/$newsId"
+                params={{ newsId: String(item.id) }}
+                className="group block rounded-2xl border border-cusens-border bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+              >
+                <article>
+                  <div className="mb-3 flex items-center justify-between gap-2 text-xs font-semibold uppercase tracking-wide text-cusens-text-secondary">
+                    <span>Article #{item.id}</span>
+                    <span>Backend Feed</span>
+                  </div>
+                  <h4 className="text-lg font-bold text-gray-900 group-hover:text-cusens-primary">{item.title}</h4>
+                  <p className="mt-2 text-sm leading-relaxed text-cusens-text-secondary">{getExcerpt(item.content)}</p>
+                  <p className="mt-4 text-sm font-semibold text-cusens-primary">Read full article</p>
+                </article>
+              </Link>
             ))}
           </div>
         )}

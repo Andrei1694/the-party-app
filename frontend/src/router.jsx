@@ -8,6 +8,7 @@ import ProtectedRoute from './auth/ProtectedRoute';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import News from './pages/News';
+import NewsArticle from './pages/NewsArticle';
 import Register from './pages/Register';
 import Users from './pages/Users';
 import Profile from './pages/Profile';
@@ -34,6 +35,16 @@ const newsRoute = createRoute({
   component: () => (
     <ProtectedRoute>
       <News />
+    </ProtectedRoute>
+  ),
+});
+
+const newsArticleRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/news/$newsId',
+  component: () => (
+    <ProtectedRoute>
+      <NewsArticle />
     </ProtectedRoute>
   ),
 });
@@ -67,6 +78,7 @@ const profileRoute = createRoute({
 const routeTree = rootRoute.addChildren([
   homeRoute,
   newsRoute,
+  newsArticleRoute,
   loginRoute,
   registerRoute,
   usersRoute,
