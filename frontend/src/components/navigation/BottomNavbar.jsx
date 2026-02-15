@@ -8,13 +8,16 @@ const BottomNavbar = ({ navItems, currentPath, onNavigate }) => {
       style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 0.5rem)' }}
       aria-label="Primary navigation"
     >
-      <div className="mx-auto grid max-w-md grid-cols-2 px-3 pt-2">
+      <div
+        className="mx-auto grid max-w-xl px-3 pt-2"
+        style={{ gridTemplateColumns: `repeat(${Math.max(navItems.length, 1)}, minmax(0, 1fr))` }}
+      >
         {navItems.map((item) => {
           const active = isPathActive(currentPath, item.to);
 
           return (
             <button
-              key={item.to}
+              key={item.key ?? `${item.to}-${item.label}`}
               type="button"
               onClick={() => onNavigate(item.to)}
               className={`flex flex-col items-center justify-center rounded-xl px-3 py-2 text-xs font-semibold transition-colors ${

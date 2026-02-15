@@ -1,14 +1,16 @@
 export const NAV_ITEMS = [
-  { label: 'Profile', to: '/profile', icon: 'person' },
-  { label: 'Users', to: '/users', icon: 'group' },
+  { key: 'profile', label: 'Profile', to: '/profile', icon: 'person' },
+  { key: 'users', label: 'Users', to: '/users', icon: 'group' },
+  { key: 'news', label: 'News', to: '/news', icon: 'newspaper' },
 ];
 
 export const ROUTE_TITLES = {
   '/profile': 'Profile',
   '/users': 'Users',
+  '/news': 'News',
 };
 
-export const SHELL_ENABLED_PATHS = ['/profile', '/users'];
+export const SHELL_ENABLED_PATHS = ['/profile', '/users', '/news'];
 
 const matchesPath = (pathname, basePath) => pathname === basePath || pathname.startsWith(`${basePath}/`);
 

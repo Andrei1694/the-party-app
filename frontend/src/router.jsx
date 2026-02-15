@@ -7,6 +7,7 @@ import App from './App';
 import ProtectedRoute from './auth/ProtectedRoute';
 import Home from './pages/Home';
 import Login from './pages/Login';
+import News from './pages/News';
 import Register from './pages/Register';
 import Users from './pages/Users';
 import Profile from './pages/Profile';
@@ -25,6 +26,16 @@ const loginRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/login',
   component: Login,
+});
+
+const newsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/news',
+  component: () => (
+    <ProtectedRoute>
+      <News />
+    </ProtectedRoute>
+  ),
 });
 
 const registerRoute = createRoute({
@@ -55,6 +66,7 @@ const profileRoute = createRoute({
 
 const routeTree = rootRoute.addChildren([
   homeRoute,
+  newsRoute,
   loginRoute,
   registerRoute,
   usersRoute,

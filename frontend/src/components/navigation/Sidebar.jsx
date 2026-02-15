@@ -49,7 +49,7 @@ const Sidebar = ({ navItems, currentPath, onNavigate, onLogout, mobile, open, on
 
             return (
               <button
-                key={item.to}
+                key={item.key ?? `${item.to}-${item.label}`}
                 type="button"
                 onClick={() => onNavigate(item.to)}
                 className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-semibold transition-colors ${
