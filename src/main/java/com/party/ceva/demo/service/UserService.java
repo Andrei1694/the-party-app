@@ -12,7 +12,10 @@ import com.party.ceva.demo.repository.UserRepository;
 
 import jakarta.transaction.Transactional;
 
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -27,16 +30,20 @@ public class UserService {
 
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final CacheManager cacheManager;
 
-	public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+	public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, CacheManager cacheManager) {
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
+		this.cacheManager = cacheManager;
 	}
 
 	public UserDto createUser(UserDto userDto) {
 		User user = toEntity(userDto);
 		user.setPassword(passwordEncoder.encode(userDto.getPassword()));
 		User savedUser = userRepository.save(user);
+		cacheManager.getCache("usersById").evict(savedUser.getId());
+		cacheManager.getCache("usersByEmail").evict(savedUser.getEmail());
 		return toDto(savedUser);
 	}
 
@@ -44,44 +51,61 @@ public class UserService {
 		return userRepository.findAll(pageable).map(this::toDto);
 	}
 
+	@Cacheable(value = "usersById", key = "#id", unless = "#result == null || #result.isEmpty()")
 	public Optional<UserDto> findById(Long id) {
 		return userRepository.findById(id).map(this::toDto);
 	}
 
-	@Cacheable(value = "users", key = "#email")
+	@Cacheable(value = "usersByEmail", key = "#email", unless = "#result == null || #result.isEmpty()")
 	public Optional<UserDto> findByEmail(String email) {
 		System.out.println("asdas");
 		return userRepository.findByEmail(email).map(this::toDto);
 	}
 
 	@Transactional
+	@Caching(evict = {
+			@CacheEvict(value = "usersById", key = "#id"),
+			@CacheEvict(value = "usersByEmail", key = "#userDto.email")
+	})
 	public UserDto updateUser(Long id, UserDto userDto) {
-		return userRepository.findById(id).map(user -> {
-			user.setEmail(userDto.getEmail());
-			if (userDto.getPassword() != null && !userDto.getPassword().isEmpty()) {
-				user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+		User existingUser = userRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("User not found with id " + id));
+
+		String oldEmail = existingUser.getEmail();
+
+		existingUser.setEmail(userDto.getEmail());
+		if (userDto.getPassword() != null && !userDto.getPassword().isEmpty()) {
+			existingUser.setPassword(passwordEncoder.encode(userDto.getPassword()));
+		}
+		if (userDto.getUserProfile() != null) {
+			UserProfile userProfile = existingUser.getUserProfile();
+			if (userProfile == null) {
+				userProfile = new UserProfile();
+				existingUser.setUserProfile(userProfile);
 			}
-			if (userDto.getUserProfile() != null) {
-				UserProfile userProfile = user.getUserProfile();
-				if (userProfile == null) {
-					userProfile = new UserProfile();
-					user.setUserProfile(userProfile);
-				}
-				userProfile.setFirstName(userDto.getUserProfile().getFirstName());
-				userProfile.setLastName(userDto.getUserProfile().getLastName());
-				userProfile.setDateOfBirth(userDto.getUserProfile().getDateOfBirth());
-				userProfile.setAddress(userDto.getUserProfile().getAddress());
-				userProfile.setProfilePictureUrl(userDto.getUserProfile().getProfilePictureUrl());
-				userProfile.setBio(userDto.getUserProfile().getBio());
-				userProfile.setTelefon(userDto.getUserProfile().getTelefon());
-				userProfile.setCnp(userDto.getUserProfile().getCnp());
-				userProfile.setSex(userDto.getUserProfile().getSex());
-				userProfile.setUpdatedAt(java.time.LocalDateTime.now());
-			} else {
-				user.setUserProfile(null);
-			}
-			return toDto(userRepository.save(user));
-		}).orElseThrow(() -> new RuntimeException("User not found with id " + id));
+			userProfile.setFirstName(userDto.getUserProfile().getFirstName());
+			userProfile.setLastName(userDto.getUserProfile().getLastName());
+			userProfile.setDateOfBirth(userDto.getUserProfile().getDateOfBirth());
+			userProfile.setAddress(userDto.getUserProfile().getAddress());
+			userProfile.setProfilePictureUrl(userDto.getUserProfile().getProfilePictureUrl());
+			userProfile.setBio(userDto.getUserProfile().getBio());
+			userProfile.setTelefon(userDto.getUserProfile().getTelefon());
+			userProfile.setCnp(userDto.getUserProfile().getCnp());
+			userProfile.setSex(userDto.getUserProfile().getSex());
+			userProfile.setUpdatedAt(java.time.LocalDateTime.now());
+		} else {
+			existingUser.setUserProfile(null);
+		}
+
+		User savedUser = userRepository.save(existingUser);
+
+		// Manually evict the old email if it changed
+		if (!oldEmail.equals(savedUser.getEmail())) {
+			cacheManager.getCache("usersByEmail").evict(oldEmail);
+		}
+
+		return toDto(savedUser);
+	}
 	}
 
 	@Transactional
@@ -118,11 +142,18 @@ public class UserService {
 		userProfile.setUpdatedAt(now);
 
 		User savedUser = userRepository.save(user);
+		cacheManager.getCache("usersById").evict(savedUser.getId());
+		cacheManager.getCache("usersByEmail").evict(savedUser.getEmail());
 		return toDto(savedUser);
 	}
 
+	@Transactional
+	@CacheEvict(value = "usersById", key = "#id")
 	public void deleteUser(Long id) {
-		userRepository.deleteById(id);
+		User userToDelete = userRepository.findById(id)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with id " + id));
+		userRepository.delete(userToDelete);
+		cacheManager.getCache("usersByEmail").evict(userToDelete.getEmail());
 	}
 
 	public UserDto registerUser(UserDto userDto) {
@@ -130,6 +161,8 @@ public class UserService {
 		user.setEmail(userDto.getEmail());
 		user.setPassword(passwordEncoder.encode(userDto.getPassword()));
 		User savedUser = userRepository.save(user);
+		cacheManager.getCache("usersById").evict(savedUser.getId());
+		cacheManager.getCache("usersByEmail").evict(savedUser.getEmail());
 		return toDto(savedUser);
 	}
 
