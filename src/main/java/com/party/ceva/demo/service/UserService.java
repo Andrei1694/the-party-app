@@ -19,6 +19,7 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -31,11 +32,14 @@ public class UserService {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final CacheManager cacheManager;
+	private final CodeGenerationService codeGenerationService;
 
-	public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, CacheManager cacheManager) {
+	public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, CacheManager cacheManager,
+			CodeGenerationService codeGenerationService) {
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.cacheManager = cacheManager;
+		this.codeGenerationService = codeGenerationService;
 	}
 
 	public UserDto createUser(UserDto userDto) {
@@ -106,7 +110,6 @@ public class UserService {
 
 		return toDto(savedUser);
 	}
-	}
 
 	@Transactional
 	public UserDto updateUserProfile(Long id, UserProfileDto profileDto, String authenticatedEmail) {
@@ -160,16 +163,34 @@ public class UserService {
 		User user = new User();
 		user.setEmail(userDto.getEmail());
 		user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+		user.setCode(generateUniqueCode());
 		User savedUser = userRepository.save(user);
 		cacheManager.getCache("usersById").evict(savedUser.getId());
 		cacheManager.getCache("usersByEmail").evict(savedUser.getEmail());
 		return toDto(savedUser);
 	}
 
+	private String generateUniqueCode() {
+		int maxAttempts = 10;
+		int attempts = 0;
+
+		while (attempts < maxAttempts) {
+			String code = codeGenerationService.generateCode();
+			if (!userRepository.existsByCode(code)) {
+				return code;
+			}
+			attempts++;
+		}
+
+		throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+				"Could not generate unique code. System at capacity.");
+	}
+
 	private UserDto toDto(User user) {
 		UserDto userDto = new UserDto();
 		userDto.setId(user.getId());
 		userDto.setEmail(user.getEmail());
+		userDto.setCode(user.getCode());
 		if (user.getUserProfile() != null) {
 			userDto.setUserProfile(toDto(user.getUserProfile()));
 		}
@@ -197,6 +218,7 @@ public class UserService {
 		User user = new User();
 		user.setId(userDto.getId());
 		user.setEmail(userDto.getEmail());
+		user.setCode(userDto.getCode());
 		if (userDto.getUserProfile() != null) {
 			user.setUserProfile(toEntity(userDto.getUserProfile()));
 		}
