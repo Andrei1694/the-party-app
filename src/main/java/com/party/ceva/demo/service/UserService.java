@@ -55,12 +55,12 @@ public class UserService {
 		return userRepository.findAll(pageable).map(this::toDto);
 	}
 
-	@Cacheable(value = "usersById", key = "#id", unless = "#result == null || #result.isEmpty()")
+	@Cacheable(value = "usersById", key = "#id", unless = "#result == null")
 	public Optional<UserDto> findById(Long id) {
 		return userRepository.findById(id).map(this::toDto);
 	}
 
-	@Cacheable(value = "usersByEmail", key = "#email", unless = "#result == null || #result.isEmpty()")
+	@Cacheable(value = "usersByEmail", key = "#email", unless = "#result == null")
 	public Optional<UserDto> findByEmail(String email) {
 		System.out.println("asdas");
 		return userRepository.findByEmail(email).map(this::toDto);

@@ -31,6 +31,7 @@ public class User {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@Column(unique = true)
 	private String email;
 	private String password;
 
@@ -39,7 +40,7 @@ public class User {
 	@JsonManagedReference
 	private UserProfile userProfile;
 
-	@Column(unique = true, length = 4, nullable = false)
+	@Column(unique = true, length = 4)
 	private String code;
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)

@@ -196,6 +196,7 @@ const Profile = () => {
             <div className="flex flex-col items-center justify-center">
               <p className="text-gray-900 text-xl font-bold leading-tight text-center">{displayName}</p>
               <p className="text-cusens-text-secondary text-sm font-medium text-center">Level 5 - Active Citizen</p>
+			  <p className="text-cusens-text-secondary text-sm font-medium text-center">{user?.code}</p>
             </div>
           </div>
 
