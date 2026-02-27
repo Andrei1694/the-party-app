@@ -2,6 +2,7 @@ package com.party.ceva.demo.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -41,6 +42,7 @@ public class SecurityConfig {
             .formLogin(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/api/auth/login", "/api/auth/register", "/api/users/register", "/swagger-ui/**", "/v3/api-docs/**", "/h2-console/**", "/uploads/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/news", "/api/news/**").permitAll()
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
