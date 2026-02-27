@@ -4,6 +4,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,6 +20,7 @@ import java.util.Map;
 
 @Service
 public class JwtService {
+    private static final Logger logger = LoggerFactory.getLogger(JwtService.class);
 
     private final Key signingKey;
     private final long expirationMs;
@@ -28,6 +31,7 @@ public class JwtService {
     ) {
         this.signingKey = Keys.hmacShaKeyFor(normalizeKeyBytes(secret));
         this.expirationMs = expirationMs;
+        logger.info("Initialized JWT service with expiration={}ms", expirationMs);
     }
 
     public String generateToken(Authentication authentication) {
@@ -35,20 +39,26 @@ public class JwtService {
         String username = principal instanceof UserDetails userDetails
             ? userDetails.getUsername()
             : authentication.getName();
+        logger.debug("Generating JWT token for authenticated principal {}", username);
         return generateTokenFromUsername(username);
     }
 
     public String generateTokenFromUsername(String username) {
+        logger.debug("Generating JWT token for username {}", username);
         return buildToken(Map.of(), username);
     }
 
     public String extractUsername(String token) {
-        return extractAllClaims(token).getSubject();
+        String subject = extractAllClaims(token).getSubject();
+        logger.debug("Extracted username {} from JWT token", subject);
+        return subject;
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
         String username = extractUsername(token);
-        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+        boolean isValid = username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+        logger.debug("JWT validation for user {} -> {}", userDetails.getUsername(), isValid);
+        return isValid;
     }
 
     private String buildToken(Map<String, Object> extraClaims, String subject) {
@@ -81,9 +91,11 @@ public class JwtService {
         if (keyBytes.length >= 32) {
             return keyBytes;
         }
+        logger.warn("Configured JWT secret is shorter than 32 bytes; deriving SHA-256 key material");
         try {
             return MessageDigest.getInstance("SHA-256").digest(keyBytes);
         } catch (NoSuchAlgorithmException ex) {
+            logger.error("SHA-256 is unavailable for JWT key derivation", ex);
             throw new IllegalStateException("SHA-256 not available for JWT key derivation", ex);
         }
     }

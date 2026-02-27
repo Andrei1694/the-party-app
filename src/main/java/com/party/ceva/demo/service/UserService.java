@@ -12,6 +12,8 @@ import com.party.ceva.demo.repository.UserRepository;
 
 import jakarta.transaction.Transactional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -19,7 +21,6 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -27,6 +28,7 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class UserService {
 
+	private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 	private static final Pattern CNP_PATTERN = Pattern.compile("^\\d{13}$");
 
 	private final UserRepository userRepository;
@@ -43,27 +45,38 @@ public class UserService {
 	}
 
 	public UserDto createUser(UserDto userDto) {
+		logger.info("Creating user for email {}", maskEmail(userDto.getEmail()));
 		User user = toEntity(userDto);
 		user.setPassword(passwordEncoder.encode(userDto.getPassword()));
 		User savedUser = userRepository.save(user);
+		logger.info("Created user with id {}", savedUser.getId());
 		cacheManager.getCache("usersById").evict(savedUser.getId());
 		cacheManager.getCache("usersByEmail").evict(savedUser.getEmail());
 		return toDto(savedUser);
 	}
 
 	public Page<UserDto> findAllUsers(Pageable pageable) {
-		return userRepository.findAll(pageable).map(this::toDto);
+		logger.debug("Fetching users page: page={}, size={}, sort={}", pageable.getPageNumber(), pageable.getPageSize(),
+				pageable.getSort());
+		Page<UserDto> users = userRepository.findAll(pageable).map(this::toDto);
+		logger.debug("Fetched users page with {} elements (total={})", users.getNumberOfElements(), users.getTotalElements());
+		return users;
 	}
 
 	@Cacheable(value = "usersById", key = "#id", unless = "#result == null")
 	public Optional<UserDto> findById(Long id) {
-		return userRepository.findById(id).map(this::toDto);
+		logger.debug("Finding user by id {}", id);
+		Optional<UserDto> user = userRepository.findById(id).map(this::toDto);
+		logger.debug("Find by id {} -> found={}", id, user.isPresent());
+		return user;
 	}
 
 	@Cacheable(value = "usersByEmail", key = "#email", unless = "#result == null")
 	public Optional<UserDto> findByEmail(String email) {
-		System.out.println("asdas");
-		return userRepository.findByEmail(email).map(this::toDto);
+		logger.debug("Finding user by email {}", maskEmail(email));
+		Optional<UserDto> user = userRepository.findByEmail(email).map(this::toDto);
+		logger.debug("Find by email {} -> found={}", maskEmail(email), user.isPresent());
+		return user;
 	}
 
 	@Transactional
@@ -72,8 +85,12 @@ public class UserService {
 			@CacheEvict(value = "usersByEmail", key = "#userDto.email")
 	})
 	public UserDto updateUser(Long id, UserDto userDto) {
+		logger.info("Updating user {}", id);
 		User existingUser = userRepository.findById(id)
-				.orElseThrow(() -> new RuntimeException("User not found with id " + id));
+				.orElseThrow(() -> {
+					logger.warn("Update user rejected: user {} not found", id);
+					return new RuntimeException("User not found with id " + id);
+				});
 
 		String oldEmail = existingUser.getEmail();
 
@@ -105,18 +122,25 @@ public class UserService {
 
 		// Manually evict the old email if it changed
 		if (!oldEmail.equals(savedUser.getEmail())) {
+			logger.info("User {} email changed from {} to {}", id, maskEmail(oldEmail), maskEmail(savedUser.getEmail()));
 			cacheManager.getCache("usersByEmail").evict(oldEmail);
 		}
 
+		logger.info("Updated user {}", id);
 		return toDto(savedUser);
 	}
 
 	@Transactional
 	public UserDto updateUserProfile(Long id, UserProfileDto profileDto, String authenticatedEmail) {
+		logger.info("Updating profile for user {} by {}", id, maskEmail(authenticatedEmail));
 		User user = userRepository.findById(id)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with id " + id));
+				.orElseThrow(() -> {
+					logger.warn("Update profile rejected: user {} not found", id);
+					return new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with id " + id);
+				});
 
 		if (authenticatedEmail == null || !user.getEmail().equalsIgnoreCase(authenticatedEmail)) {
+			logger.warn("Update profile rejected: user {} attempted by {}", id, maskEmail(authenticatedEmail));
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only update your own profile");
 		}
 
@@ -147,19 +171,26 @@ public class UserService {
 		User savedUser = userRepository.save(user);
 		cacheManager.getCache("usersById").evict(savedUser.getId());
 		cacheManager.getCache("usersByEmail").evict(savedUser.getEmail());
+		logger.info("Updated profile for user {}", id);
 		return toDto(savedUser);
 	}
 
 	@Transactional
 	@CacheEvict(value = "usersById", key = "#id")
 	public void deleteUser(Long id) {
+		logger.info("Deleting user {}", id);
 		User userToDelete = userRepository.findById(id)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with id " + id));
+				.orElseThrow(() -> {
+					logger.warn("Delete user rejected: user {} not found", id);
+					return new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with id " + id);
+				});
 		userRepository.delete(userToDelete);
 		cacheManager.getCache("usersByEmail").evict(userToDelete.getEmail());
+		logger.info("Deleted user {}", id);
 	}
 
 	public UserDto registerUser(UserDto userDto) {
+		logger.info("Registering user for email {}", maskEmail(userDto.getEmail()));
 		User user = new User();
 		user.setEmail(userDto.getEmail());
 		user.setPassword(passwordEncoder.encode(userDto.getPassword()));
@@ -167,6 +198,7 @@ public class UserService {
 		User savedUser = userRepository.save(user);
 		cacheManager.getCache("usersById").evict(savedUser.getId());
 		cacheManager.getCache("usersByEmail").evict(savedUser.getEmail());
+		logger.info("Registered user {} with generated code", savedUser.getId());
 		return toDto(savedUser);
 	}
 
@@ -177,11 +209,14 @@ public class UserService {
 		while (attempts < maxAttempts) {
 			String code = codeGenerationService.generateCode();
 			if (!userRepository.existsByCode(code)) {
+				logger.debug("Generated unique code after {} attempt(s)", attempts + 1);
 				return code;
 			}
+			logger.warn("Code collision on attempt {}", attempts + 1);
 			attempts++;
 		}
 
+		logger.error("Failed to generate unique code after {} attempts", maxAttempts);
 		throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
 				"Could not generate unique code. System at capacity.");
 	}
@@ -244,11 +279,13 @@ public class UserService {
 
 	private void validateProfilePayload(UserProfileDto profileDto) {
 		if (profileDto == null) {
+			logger.warn("Profile validation failed: payload is null");
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Profile payload is required");
 		}
 
 		String normalizedCnp = normalizeNullable(profileDto.getCnp());
 		if (normalizedCnp != null && !CNP_PATTERN.matcher(normalizedCnp).matches()) {
+			logger.warn("Profile validation failed: invalid CNP format");
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "CNP must contain exactly 13 digits");
 		}
 
@@ -256,6 +293,7 @@ public class UserService {
 		if (sex != null) {
 			char normalizedSex = Character.toUpperCase(sex);
 			if (normalizedSex != 'M' && normalizedSex != 'F' && normalizedSex != 'O') {
+				logger.warn("Profile validation failed: invalid sex value {}", sex);
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sex must be one of M, F, or O");
 			}
 			profileDto.setSex(normalizedSex);
@@ -268,5 +306,16 @@ public class UserService {
 		}
 		String normalized = value.trim();
 		return normalized.isEmpty() ? null : normalized;
+	}
+
+	private String maskEmail(String email) {
+		if (email == null || email.isBlank()) {
+			return "<empty>";
+		}
+		int atIndex = email.indexOf('@');
+		if (atIndex <= 1) {
+			return "***";
+		}
+		return email.charAt(0) + "***" + email.substring(atIndex);
 	}
 }
