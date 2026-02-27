@@ -6,6 +6,10 @@ import Sidebar from './components/navigation/Sidebar';
 import TopNavbar from './components/navigation/TopNavbar';
 import { NAV_ITEMS, getRouteTitle, isShellRoute } from './navigation/navConfig';
 
+const DEFAULT_AVATAR_URL =
+  'https://lh3.googleusercontent.com/aida-public/AB6AXuD7cbnwFcAoyOb5pOj744xfX7_cAy6Ugq1YRcDnUrEVaKSYqKlk4ZzDZw9sBVYTIHe_EBpEwhbBrT7l2rAcru-k3g_b8YkjAPWe_T42Hju-7OT_JINXzdE-jt0zyjKnnAIes_8YKHehNzLb-FExOKEGuhtu_gYOd2tjcvniKNxYzKjtTk9GWEessHgFR879XlRoXkoNIs0pzZMTSpRV7oIH5dogZfvbD8FEGA4CpkaLtBbAAyufOoeBrCe1-yxJfqJkycLR5BBaro8f';
+const BOTTOM_NAV_ITEMS = NAV_ITEMS.filter((item) => item.key !== 'profile');
+
 function App() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -23,6 +27,11 @@ function App() {
     return fullName || user?.email || 'Citizen';
   }, [user]);
 
+  const userAvatarUrl = useMemo(() => {
+    const profilePictureUrl = user?.userProfile?.profilePictureUrl?.trim() || '';
+    return profilePictureUrl || DEFAULT_AVATAR_URL;
+  }, [user]);
+
   const handleNavigate = useCallback(
     (to) => {
       setMobileSidebarOpen(false);
@@ -36,6 +45,10 @@ function App() {
     await logout();
     navigate({ to: '/login' });
   }, [logout, navigate]);
+
+  const handleProfileClick = useCallback(() => {
+    handleNavigate('/profile');
+  }, [handleNavigate]);
 
   if (!showShell) {
     return (
@@ -56,11 +69,17 @@ function App() {
       />
 
       <div className="flex min-h-screen flex-1 flex-col font-display">
-        <TopNavbar title={title} onMenuClick={() => setMobileSidebarOpen(true)} userLabel={userLabel} />
+        <TopNavbar
+          title={title}
+          onMenuClick={() => setMobileSidebarOpen(true)}
+          userLabel={userLabel}
+          userAvatarUrl={userAvatarUrl}
+          onProfileClick={handleProfileClick}
+        />
         <main className="flex-1 overflow-y-auto px-4 pb-28 pt-4 sm:px-6 md:px-8 md:pb-8 md:pt-6">
           <Outlet />
         </main>
-        <BottomNavbar navItems={NAV_ITEMS} currentPath={pathname} onNavigate={handleNavigate} />
+        <BottomNavbar navItems={BOTTOM_NAV_ITEMS} currentPath={pathname} onNavigate={handleNavigate} />
       </div>
 
       <Sidebar

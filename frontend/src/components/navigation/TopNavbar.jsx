@@ -1,4 +1,4 @@
-const TopNavbar = ({ title, onMenuClick, userLabel }) => {
+const TopNavbar = ({ title, onMenuClick, userLabel, userAvatarUrl, onProfileClick }) => {
   return (
     <header className="sticky top-0 z-30 border-b border-cusens-border bg-cusens-surface/95 backdrop-blur-md">
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center gap-3 px-4 sm:px-6">
@@ -16,10 +16,19 @@ const TopNavbar = ({ title, onMenuClick, userLabel }) => {
           <h1 className="truncate text-lg font-bold leading-tight text-cusens-text-primary">{title}</h1>
         </div>
 
-        <div className="hidden max-w-[16rem] items-center gap-2 rounded-full border border-cusens-border bg-cusens-surface px-3 py-2 md:flex">
-          <span className="material-icons text-cusens-primary">account_circle</span>
-          <span className="truncate text-sm font-semibold text-cusens-text-primary">{userLabel}</span>
-        </div>
+        <button
+          type="button"
+          onClick={onProfileClick}
+          className="inline-flex max-w-[12rem] items-center gap-2 rounded-full border border-cusens-border bg-cusens-surface px-2 py-1 transition-colors hover:bg-cusens-surface-muted"
+          aria-label="Open profile"
+        >
+          <img
+            src={userAvatarUrl}
+            alt={`${userLabel} avatar`}
+            className="h-8 w-8 rounded-full border border-cusens-border object-cover"
+          />
+          <span className="hidden truncate text-sm font-semibold text-cusens-text-primary sm:inline">{userLabel}</span>
+        </button>
       </div>
     </header>
   );
