@@ -30,3 +30,4 @@ target/
 
 ### VS Code ###
 .vscode/
+build/party-app-images.tar.gz
