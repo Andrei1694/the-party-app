@@ -1,4 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMemo, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import api, { endpoints } from '../requests';
 
 const PAGE_SIZE = 20;
@@ -89,12 +90,75 @@ const fetchEvents = async () => {
   return extractEventItems(data).map(mapBackendEvent);
 };
 
+const extractJoinedEventIds = (payload) => {
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+
+  return [];
+};
+
+const fetchJoinedEventIds = async () => {
+  const { data } = await api.get(endpoints.eventsJoined);
+  return extractJoinedEventIds(data);
+};
+
 const Events = () => {
+  const queryClient = useQueryClient();
+  const [joinError, setJoinError] = useState('');
+
   const { data: events = [], error, isLoading, isFetching, refetch } = useQuery({
     queryKey: ['events'],
     queryFn: fetchEvents,
     staleTime: 30_000,
   });
+
+  const {
+    data: joinedEventIds = [],
+    isFetching: isFetchingJoined,
+    isLoading: isLoadingJoined,
+    refetch: refetchJoined,
+  } = useQuery({
+    queryKey: ['events', 'joined'],
+    queryFn: fetchJoinedEventIds,
+    staleTime: 30_000,
+  });
+
+  const joinedEventIdSet = useMemo(() => new Set(joinedEventIds), [joinedEventIds]);
+
+  const joinEventMutation = useMutation({
+    mutationFn: async (eventId) => {
+      await api.post(endpoints.eventJoin(eventId));
+      return eventId;
+    },
+    onMutate: () => {
+      setJoinError('');
+    },
+    onSuccess: (eventId) => {
+      queryClient.setQueryData(['events', 'joined'], (previousIds = []) => {
+        if (previousIds.includes(eventId)) {
+          return previousIds;
+        }
+        return [...previousIds, eventId];
+      });
+    },
+    onError: (mutationError, eventId) => {
+      if (mutationError?.response?.status === 409) {
+        queryClient.setQueryData(['events', 'joined'], (previousIds = []) => {
+          if (previousIds.includes(eventId)) {
+            return previousIds;
+          }
+          return [...previousIds, eventId];
+        });
+        return;
+      }
+
+      const message = mutationError?.response?.data?.message || 'Could not join this event right now.';
+      setJoinError(message);
+    },
+  });
+
+  const isRefreshing = isFetching || isFetchingJoined;
 
   return (
     <section className="font-display">
@@ -113,16 +177,23 @@ const Events = () => {
 
               <button
                 type="button"
-                onClick={() => refetch()}
+                onClick={() => {
+                  setJoinError('');
+                  void Promise.all([refetch(), refetchJoined()]);
+                }}
                 className="inline-flex items-center gap-2 rounded-xl border border-cusens-border bg-white px-3 py-2 text-sm font-semibold text-cusens-text-primary hover:bg-cusens-bg"
-                disabled={isFetching}
+                disabled={isRefreshing}
               >
                 <span className="material-icons text-[18px]">refresh</span>
-                {isFetching ? 'Refreshing...' : 'Refresh'}
+                {isRefreshing ? 'Refreshing...' : 'Refresh'}
               </button>
             </div>
           </div>
         </header>
+
+        {joinError && (
+          <div className="rounded-3xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{joinError}</div>
+        )}
 
         {isLoading && (
           <div className="rounded-3xl border border-cusens-border bg-white p-6 text-sm text-cusens-text-secondary shadow-sm">
@@ -144,40 +215,64 @@ const Events = () => {
 
         {!isLoading && !error && events.length > 0 && (
           <div className="grid gap-4 md:grid-cols-2">
-            {events.map((event) => (
-              <article key={event.id} className="rounded-2xl border border-cusens-border bg-white p-5 shadow-sm">
-                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                  <span className="text-xs font-semibold uppercase tracking-wide text-cusens-text-secondary">
-                    Event #{event.id}
-                  </span>
-                  <span
-                    className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
-                      statusClassByLabel[event.status] || statusClassByLabel.Closed
-                    }`}
-                  >
-                    {event.status}
-                  </span>
-                </div>
+            {events.map((event) => {
+              const isJoined = joinedEventIdSet.has(event.id);
+              const isClosed = event.status === 'Closed';
+              const isJoiningCurrent = joinEventMutation.isPending && joinEventMutation.variables === event.id;
+              const canJoin = !isClosed && !isJoined;
 
-                <h3 className="text-lg font-bold text-cusens-text-primary">{event.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-cusens-text-secondary">{event.description}</p>
+              return (
+                <article key={event.id} className="rounded-2xl border border-cusens-border bg-white p-5 shadow-sm">
+                  <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-cusens-text-secondary">
+                      Event #{event.id}
+                    </span>
+                    <span
+                      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
+                        statusClassByLabel[event.status] || statusClassByLabel.Closed
+                      }`}
+                    >
+                      {event.status}
+                    </span>
+                  </div>
 
-                <div className="mt-4 space-y-2 text-sm text-cusens-text-secondary">
-                  <p className="flex items-center gap-2">
-                    <span className="material-icons text-[18px] text-cusens-primary">schedule</span>
-                    <span>{formatDateTime(event.startsAt)}</span>
-                  </p>
-                  <p className="flex items-center gap-2">
-                    <span className="material-icons text-[18px] text-cusens-primary">place</span>
-                    <span>{event.location}</span>
-                  </p>
-                </div>
+                  <h3 className="text-lg font-bold text-cusens-text-primary">{event.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-cusens-text-secondary">{event.description}</p>
 
-                <div className="mt-4 inline-flex rounded-full bg-cusens-bg px-3 py-1 text-xs font-semibold uppercase tracking-wide text-cusens-text-secondary">
-                  {event.category}
-                </div>
-              </article>
-            ))}
+                  <div className="mt-4 space-y-2 text-sm text-cusens-text-secondary">
+                    <p className="flex items-center gap-2">
+                      <span className="material-icons text-[18px] text-cusens-primary">schedule</span>
+                      <span>{formatDateTime(event.startsAt)}</span>
+                    </p>
+                    <p className="flex items-center gap-2">
+                      <span className="material-icons text-[18px] text-cusens-primary">place</span>
+                      <span>{event.location}</span>
+                    </p>
+                  </div>
+
+                  <div className="mt-4 flex items-center justify-between gap-3">
+                    <div className="inline-flex rounded-full bg-cusens-bg px-3 py-1 text-xs font-semibold uppercase tracking-wide text-cusens-text-secondary">
+                      {event.category}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => joinEventMutation.mutate(event.id)}
+                      disabled={!canJoin || isJoiningCurrent || isLoadingJoined}
+                      className={`inline-flex items-center rounded-xl px-4 py-2 text-sm font-semibold transition ${
+                        isJoined
+                          ? 'cursor-default border border-green-200 bg-green-50 text-green-700'
+                          : isClosed
+                            ? 'cursor-not-allowed border border-gray-200 bg-gray-100 text-gray-500'
+                            : 'border border-cusens-primary bg-cusens-primary text-cusens-text-primary hover:bg-cusens-primary-hover'
+                      }`}
+                    >
+                      {isJoiningCurrent ? 'Joining...' : isJoined ? 'Joined' : isClosed ? 'Closed' : 'Join'}
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         )}
       </div>

@@ -15,6 +15,8 @@ export const endpoints = {
   users: '/users',
   news: '/news',
   events: '/events',
+  eventsJoined: '/events/joined',
+  eventJoin: (id) => `/events/${id}/join`,
   newsById: (id) => `/news/news/${id}`,
   usersProfile: (id) => `/users/${id}/profile`,
   files: {
