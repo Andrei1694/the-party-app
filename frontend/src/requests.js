@@ -14,6 +14,7 @@ const api = axios.create({
 export const endpoints = {
   users: '/users',
   news: '/news',
+  events: '/events',
   newsById: (id) => `/news/news/${id}`,
   usersProfile: (id) => `/users/${id}/profile`,
   files: {
