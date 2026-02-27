@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import AsyncStateCard from '../components/feedback/AsyncStateCard';
 import api, { endpoints } from '../requests';
 
 const fetchUsers = async () => {
@@ -12,8 +13,8 @@ const Users = () => {
   if (isLoading) {
     return (
       <section className="font-display">
-        <div className="mx-auto w-full max-w-4xl rounded-3xl border border-cusens-border bg-cusens-surface p-6 shadow-sm">
-          <p className="text-sm font-medium text-cusens-text-secondary">Loading users...</p>
+        <div className="mx-auto w-full max-w-4xl">
+          <AsyncStateCard message={<span className="font-medium">Loading users...</span>} className="bg-cusens-surface" />
         </div>
       </section>
     );
@@ -22,8 +23,8 @@ const Users = () => {
   if (error) {
     return (
       <section className="font-display">
-        <div className="mx-auto w-full max-w-4xl rounded-3xl border border-red-200 bg-red-50 p-6">
-          <p className="text-sm font-medium text-red-700">An error occurred: {error.message}</p>
+        <div className="mx-auto w-full max-w-4xl">
+          <AsyncStateCard tone="danger" message={<span className="font-medium">An error occurred: {error.message}</span>} />
         </div>
       </section>
     );

@@ -1,6 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useForm, useStore } from '@tanstack/react-form';
 import { useAuth } from '../auth/AuthContext';
+import getFieldError from '../forms/getFieldError';
+import useFormSubmitHandler from '../forms/useFormSubmitHandler';
 import { useFileUploadService } from '../service/useFileUploadService';
 
 const DEFAULT_AVATAR_URL = 'https://lh3.googleusercontent.com/aida-public/AB6AXuD7cbnwFcAoyOb5pOj744xfX7_cAy6Ugq1YRcDnUrEVaKSYqKlk4ZzDZw9sBVYTIHe_EBpEwhbBrT7l2rAcru-k3g_b8YkjAPWe_T42Hju-7OT_JINXzdE-jt0zyjKnnAIes_8YKHehNzLb-FExOKEGuhtu_gYOd2tjcvniKNxYzKjtTk9GWEessHgFR879XlRoXkoNIs0pzZMTSpRV7oIH5dogZfvbD8FEGA4CpkaLtBbAAyufOoeBrCe1-yxJfqJkycLR5BBaro8f';
@@ -18,23 +20,6 @@ const emptyForm = {
 };
 
 const cnpRegex = /^\d{13}$/;
-
-const getFieldError = (errors) => {
-  if (!errors?.length) {
-    return null;
-  }
-
-  const [firstError] = errors;
-  if (typeof firstError === 'string') {
-    return firstError;
-  }
-
-  if (firstError && typeof firstError === 'object' && 'message' in firstError) {
-    return String(firstError.message);
-  }
-
-  return 'Invalid value.';
-};
 
 const getBackendErrorMessage = (error, fallbackMessage) => {
   const backendMessage =
@@ -81,6 +66,7 @@ const buildProfileUpdatePayloadFromProfile = (profile, profilePictureUrlOverride
 
 const Profile = () => {
   const { user, updateProfile } = useAuth();
+  const profilePictureInputRef = useRef(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [uploadError, setUploadError] = useState('');
@@ -174,11 +160,14 @@ const Profile = () => {
     }
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    void form.handleSubmit();
+  const handleAvatarClick = () => {
+    if (isPictureActionPending) {
+      return;
+    }
+    profilePictureInputRef.current?.click();
   };
+
+  const handleSubmit = useFormSubmitHandler(form);
 
   const inputClassName =
     'block w-full px-3 py-3 border border-cusens-border rounded-xl leading-5 bg-cusens-bg text-cusens-text-primary placeholder-cusens-text-secondary/70 focus:outline-none focus:ring-2 focus:ring-cusens-primary focus:border-cusens-primary sm:text-sm transition duration-200 ease-in-out';
@@ -188,15 +177,43 @@ const Profile = () => {
       <div className="w-full max-w-md bg-cusens-surface rounded-3xl shadow-xl overflow-hidden border border-cusens-border relative flex flex-col">
         <main className="flex-1 overflow-y-auto px-6 pb-24 pt-6">
           <div className="flex flex-col items-center gap-4">
-            <div
-              className="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-28 w-28 shadow-md border-4 border-cusens-primary/15"
-              data-alt="User avatar"
-              style={{ backgroundImage: `url("${avatarUrl}")` }}
-            ></div>
+            <input
+              ref={profilePictureInputRef}
+              id="profilePictureFile"
+              name="profilePictureFile"
+              type="file"
+              accept="image/*"
+              onChange={handleProfilePictureUpload}
+              disabled={isPictureActionPending}
+              className="hidden"
+              tabIndex={-1}
+            />
+            <button
+              type="button"
+              onClick={handleAvatarClick}
+              disabled={isPictureActionPending}
+              aria-label="Change profile picture"
+              className="group relative rounded-full focus:outline-none focus:ring-2 focus:ring-cusens-primary focus:ring-offset-2 focus:ring-offset-cusens-surface disabled:cursor-not-allowed disabled:opacity-80"
+            >
+              <div
+                className="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-28 w-28 shadow-md border-4 border-cusens-primary/15 transition-transform duration-200 group-hover:scale-[1.03]"
+                data-alt="User avatar"
+                style={{ backgroundImage: `url("${avatarUrl}")` }}
+              ></div>
+              <span className="absolute -bottom-1 -right-1 inline-flex h-9 w-9 items-center justify-center rounded-full border-2 border-cusens-surface bg-cusens-primary text-cusens-text-primary shadow-md">
+                <span className="material-icons text-[18px]">photo_camera</span>
+              </span>
+            </button>
+            <p className="text-cusens-text-secondary text-xs font-semibold uppercase tracking-wide">Tap avatar to change photo</p>
             <div className="flex flex-col items-center justify-center">
               <p className="text-cusens-text-primary text-xl font-bold leading-tight text-center">{displayName}</p>
               <p className="text-cusens-text-secondary text-sm font-medium text-center">Level 5 - Active Citizen</p>
-			  <p className="text-cusens-text-secondary text-sm font-medium text-center">{user?.code}</p>
+              <p className="text-cusens-text-secondary text-sm font-medium text-center">{user?.code}</p>
+            </div>
+            <div className="w-full max-w-xs text-center">
+              {pictureStatusMessage && <p className="text-sm text-cusens-text-secondary">{pictureStatusMessage}</p>}
+              {uploadError && <p className="text-sm text-red-600">{uploadError}</p>}
+              {uploadSuccess && <p className="text-sm text-green-600">{uploadSuccess}</p>}
             </div>
           </div>
 
@@ -353,44 +370,6 @@ const Profile = () => {
                   )}
                 </form.Field>
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-cusens-text-primary mb-1.5" htmlFor="profilePictureFile">
-                  Upload Profile Picture
-                </label>
-                <input
-                  id="profilePictureFile"
-                  name="profilePictureFile"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleProfilePictureUpload}
-                  disabled={isPictureActionPending}
-                  className={inputClassName}
-                />
-                {pictureStatusMessage && <p className="mt-1 text-sm text-gray-600">{pictureStatusMessage}</p>}
-                {uploadError && <p className="mt-1 text-sm text-red-600">{uploadError}</p>}
-                {uploadSuccess && <p className="mt-1 text-sm text-green-600">{uploadSuccess}</p>}
-              </div>
-
-              <form.Field name="profilePictureUrl">
-                {(field) => (
-                  <div>
-                    <label className="block text-sm font-medium text-cusens-text-primary mb-1.5" htmlFor="profilePictureUrl">
-                      Profile Picture URL
-                    </label>
-                    <input
-                      id="profilePictureUrl"
-                      name="profilePictureUrl"
-                      type="url"
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(event) => field.handleChange(event.target.value)}
-                      className={inputClassName}
-                      placeholder="https://example.com/avatar.jpg"
-                    />
-                  </div>
-                )}
-              </form.Field>
 
               <form.Field name="address">
                 {(field) => (

@@ -1,6 +1,9 @@
 import { useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useParams } from '@tanstack/react-router';
+import AsyncStateCard from '../components/feedback/AsyncStateCard';
+import PageFeedHeader from '../components/layout/PageFeedHeader';
+import { DEFAULT_STALE_TIME_MS } from '../queries/queryDefaults';
 import api, { endpoints } from '../requests';
 
 const getErrorMessage = (error) =>
@@ -45,17 +48,18 @@ const NewsArticle = () => {
     queryFn: () => fetchNewsById(newsId),
     enabled: isValidNewsId,
     initialData: cachedNews,
-    staleTime: 30_000,
+    staleTime: DEFAULT_STALE_TIME_MS,
   });
 
   if (!isValidNewsId) {
     return (
       <section className="font-display">
-        <div className="mx-auto w-full max-w-4xl rounded-3xl border border-red-200 bg-red-50 p-6">
-          <p className="text-sm font-medium text-red-700">Invalid article id: {newsId}</p>
-          <Link to="/news" className="mt-4 inline-flex text-sm font-semibold text-cusens-primary hover:underline">
-            Back to News
-          </Link>
+        <div className="mx-auto w-full max-w-4xl">
+          <AsyncStateCard tone="danger" message={`Invalid article id: ${newsId}`}>
+            <Link to="/news" className="inline-flex items-center text-sm font-semibold text-cusens-primary hover:underline">
+              Back to News
+            </Link>
+          </AsyncStateCard>
         </div>
       </section>
     );
@@ -64,8 +68,8 @@ const NewsArticle = () => {
   if (isLoading) {
     return (
       <section className="font-display">
-        <div className="mx-auto w-full max-w-4xl rounded-3xl border border-cusens-border bg-white p-6 text-sm text-cusens-text-secondary shadow-sm">
-          Loading article...
+        <div className="mx-auto w-full max-w-4xl">
+          <AsyncStateCard message="Loading article..." />
         </div>
       </section>
     );
@@ -100,8 +104,8 @@ const NewsArticle = () => {
   if (!article) {
     return (
       <section className="font-display">
-        <div className="mx-auto w-full max-w-4xl rounded-3xl border border-cusens-border bg-white p-6 text-sm text-cusens-text-secondary shadow-sm">
-          This article is currently unavailable.
+        <div className="mx-auto w-full max-w-4xl">
+          <AsyncStateCard message="This article is currently unavailable." />
         </div>
       </section>
     );
@@ -110,26 +114,16 @@ const NewsArticle = () => {
   return (
     <section className="font-display">
       <div className="mx-auto w-full max-w-4xl space-y-5">
-        <header className="rounded-3xl border border-cusens-border bg-white p-6 shadow-sm">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-cusens-primary">Newsroom</p>
-              <h2 className="mt-2 text-2xl font-bold text-cusens-text-primary sm:text-3xl">{article.title}</h2>
-              <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-cusens-text-secondary">
-                Article #{article.id}
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => refetch()}
-              className="inline-flex items-center gap-2 rounded-xl border border-cusens-border bg-white px-3 py-2 text-sm font-semibold text-cusens-text-primary hover:bg-cusens-bg"
-              disabled={isFetching}
-            >
-              <span className="material-icons text-[18px]">refresh</span>
-              {isFetching ? 'Refreshing...' : 'Refresh'}
-            </button>
-          </div>
-        </header>
+        <PageFeedHeader
+          kicker="Newsroom"
+          title={article.title}
+          isRefreshing={isFetching}
+          onRefresh={() => refetch()}
+          className="overflow-visible"
+          bodyClassName="px-6 py-6"
+        >
+          <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-cusens-text-secondary">Article #{article.id}</p>
+        </PageFeedHeader>
 
         <article className="rounded-3xl border border-cusens-border bg-white p-6 shadow-sm">
           <p className="whitespace-pre-line text-sm leading-relaxed text-cusens-text-secondary">{article.content}</p>

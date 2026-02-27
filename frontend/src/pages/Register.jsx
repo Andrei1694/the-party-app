@@ -3,24 +3,9 @@ import { useForm } from '@tanstack/react-form';
 import { Link, useRouter } from '@tanstack/react-router';
 import InputField from '../components/InputField';
 import Button from '../components/Button';
+import getFieldError from '../forms/getFieldError';
+import useFormSubmitHandler from '../forms/useFormSubmitHandler';
 import { registerUser } from '../requests';
-
-const getFieldError = (errors) => {
-  if (!errors?.length) {
-    return null;
-  }
-
-  const [firstError] = errors;
-  if (typeof firstError === 'string') {
-    return firstError;
-  }
-
-  if (firstError && typeof firstError === 'object' && 'message' in firstError) {
-    return String(firstError.message);
-  }
-
-  return 'Invalid value.';
-};
 
 const Register = () => {
   const router = useRouter();
@@ -65,11 +50,7 @@ const Register = () => {
     },
   });
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    void form.handleSubmit();
-  };
+  const handleSubmit = useFormSubmitHandler(form);
 
   const handleGoBack = () => {
     router.history.back();

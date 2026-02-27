@@ -1,5 +1,4 @@
-const isPathActive = (currentPath, targetPath) =>
-  currentPath === targetPath || currentPath.startsWith(`${targetPath}/`);
+import isPathActive from '../../navigation/isPathActive';
 
 const BottomNavbar = ({ navItems, currentPath, onNavigate }) => {
   return (

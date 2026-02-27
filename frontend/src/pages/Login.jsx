@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useForm } from '@tanstack/react-form';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { useAuth } from '../auth/AuthContext';
+import useFormSubmitHandler from '../forms/useFormSubmitHandler';
 
 const Login = () => {
   const { login } = useAuth();
@@ -26,11 +27,7 @@ const Login = () => {
     },
   });
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    void form.handleSubmit();
-  };
+  const handleSubmit = useFormSubmitHandler(form);
 
   return (
     <div className="bg-cusens-bg font-display min-h-screen flex items-center justify-center p-4">

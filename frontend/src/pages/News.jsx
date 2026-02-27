@@ -1,21 +1,11 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
+import AsyncStateCard from '../components/feedback/AsyncStateCard';
+import PageFeedHeader from '../components/layout/PageFeedHeader';
+import extractPaginatedContent from '../queries/extractPaginatedContent';
+import { DEFAULT_PAGE_SIZE, DEFAULT_STALE_TIME_MS } from '../queries/queryDefaults';
 import api, { endpoints } from '../requests';
-
-const PAGE_SIZE = 20;
-
-const extractNewsItems = (payload) => {
-  if (Array.isArray(payload)) {
-    return payload;
-  }
-
-  if (Array.isArray(payload?.content)) {
-    return payload.content;
-  }
-
-  return [];
-};
 
 const getExcerpt = (text, maxLength = 220) => {
   const normalized = (text || '').trim();
@@ -30,19 +20,19 @@ const fetchNews = async () => {
   const { data } = await api.get(endpoints.news, {
     params: {
       page: 0,
-      size: PAGE_SIZE,
+      size: DEFAULT_PAGE_SIZE,
       sort: 'id,desc',
     },
   });
 
-  return extractNewsItems(data);
+  return extractPaginatedContent(data);
 };
 
 const News = () => {
   const { data = [], error, isLoading, isFetching, refetch } = useQuery({
     queryKey: ['news'],
     queryFn: fetchNews,
-    staleTime: 30_000,
+    staleTime: DEFAULT_STALE_TIME_MS,
   });
 
   const featuredNews = useMemo(() => data[0] ?? null, [data]);
@@ -51,40 +41,24 @@ const News = () => {
   return (
     <section className="font-display">
       <div className="mx-auto w-full max-w-6xl space-y-5">
-        <header className="overflow-hidden rounded-3xl border border-cusens-border bg-white shadow-sm">
-          <div className="bg-gradient-to-r from-cusens-primary/10 via-cusens-primary/5 to-transparent px-6 py-6">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-cusens-primary">Newsroom</p>
-                <h2 className="mt-2 text-2xl font-bold text-cusens-text-primary sm:text-3xl">Latest Updates</h2>
-                <p className="mt-2 max-w-3xl text-sm text-cusens-text-secondary">
-                  Live data from backend endpoint <code>/api/news</code>.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => refetch()}
-                className="inline-flex items-center gap-2 rounded-xl border border-cusens-border bg-white px-3 py-2 text-sm font-semibold text-cusens-text-primary hover:bg-cusens-bg"
-                disabled={isFetching}
-              >
-                <span className="material-icons text-[18px]">refresh</span>
-                {isFetching ? 'Refreshing...' : 'Refresh'}
-              </button>
-            </div>
-          </div>
-        </header>
+        <PageFeedHeader
+          kicker="Newsroom"
+          title="Latest Updates"
+          description={
+            <>
+              Live data from backend endpoint <code>/api/news</code>.
+            </>
+          }
+          isRefreshing={isFetching}
+          onRefresh={() => refetch()}
+        />
 
         {isLoading && (
-          <div className="rounded-3xl border border-cusens-border bg-white p-6 text-sm text-cusens-text-secondary shadow-sm">
-            Loading news from backend...
-          </div>
+          <AsyncStateCard message="Loading news from backend..." />
         )}
 
         {error && !isLoading && (
-          <div className="rounded-3xl border border-red-200 bg-red-50 p-6 text-sm text-red-700">
-            Could not load news. {error.message}
-          </div>
+          <AsyncStateCard tone="danger" message={`Could not load news. ${error.message}`} />
         )}
 
         {!isLoading && !error && featuredNews && (
@@ -111,9 +85,13 @@ const News = () => {
         )}
 
         {!isLoading && !error && data.length === 0 && (
-          <div className="rounded-3xl border border-cusens-border bg-white p-6 text-sm text-cusens-text-secondary shadow-sm">
-            No news available yet. Create one with a POST to <code>/api/news</code>.
-          </div>
+          <AsyncStateCard
+            message={
+              <>
+                No news available yet. Create one with a POST to <code>/api/news</code>.
+              </>
+            }
+          />
         )}
 
         {!isLoading && !error && newsList.length > 0 && (
