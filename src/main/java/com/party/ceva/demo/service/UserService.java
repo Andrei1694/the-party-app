@@ -112,7 +112,7 @@ public class UserService {
 			userProfile.setBio(userDto.getUserProfile().getBio());
 			userProfile.setTelefon(userDto.getUserProfile().getTelefon());
 			userProfile.setCnp(userDto.getUserProfile().getCnp());
-			userProfile.setSex(userDto.getUserProfile().getSex());
+			userProfile.setSex(normalizeSexOrDefault(userDto.getUserProfile().getSex()));
 			userProfile.setUpdatedAt(java.time.LocalDateTime.now());
 		} else {
 			existingUser.setUserProfile(null);
@@ -165,7 +165,7 @@ public class UserService {
 		userProfile.setBio(profileDto.getBio());
 		userProfile.setTelefon(profileDto.getTelefon());
 		userProfile.setCnp(normalizeNullable(profileDto.getCnp()));
-		userProfile.setSex(profileDto.getSex());
+		userProfile.setSex(normalizeSexOrDefault(profileDto.getSex()));
 		userProfile.setUpdatedAt(now);
 
 		User savedUser = userRepository.save(user);
@@ -289,14 +289,11 @@ public class UserService {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "CNP must contain exactly 13 digits");
 		}
 
-		Character sex = profileDto.getSex();
-		if (sex != null) {
-			char normalizedSex = Character.toUpperCase(sex);
-			if (normalizedSex != 'M' && normalizedSex != 'F' && normalizedSex != 'O') {
-				logger.warn("Profile validation failed: invalid sex value {}", sex);
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sex must be one of M, F, or O");
-			}
-			profileDto.setSex(normalizedSex);
+		try {
+			profileDto.setSex(normalizeSexOrDefault(profileDto.getSex()));
+		} catch (IllegalArgumentException ex) {
+			logger.warn("Profile validation failed: invalid sex value {}", profileDto.getSex());
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
 		}
 	}
 
@@ -306,6 +303,19 @@ public class UserService {
 		}
 		String normalized = value.trim();
 		return normalized.isEmpty() ? null : normalized;
+	}
+
+	private Character normalizeSexOrDefault(Character sex) {
+		if (sex == null) {
+			return 'O';
+		}
+
+		char normalizedSex = Character.toUpperCase(sex);
+		if (normalizedSex != 'M' && normalizedSex != 'F' && normalizedSex != 'O') {
+			throw new IllegalArgumentException("Sex must be one of M, F, or O");
+		}
+
+		return normalizedSex;
 	}
 
 	private String maskEmail(String email) {
