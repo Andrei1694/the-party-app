@@ -3,6 +3,7 @@ import { useForm } from '@tanstack/react-form';
 import { Link, useNavigate, useRouter, useSearch } from '@tanstack/react-router';
 import { useAuth } from '../auth/AuthContext';
 import useFormSubmitHandler from '../forms/useFormSubmitHandler';
+import BrandLogo from '../components/BrandLogo';
 
 const isSafeInternalRedirect = (redirectPath) => {
   if (typeof redirectPath !== 'string' || !redirectPath.startsWith('/') || redirectPath.startsWith('//')) {
@@ -61,10 +62,12 @@ const Login = () => {
       <div className="w-full max-w-sm mx-auto bg-cusens-surface rounded-3xl shadow-xl overflow-hidden border border-cusens-border relative">
         <div className="px-8 pt-8 pb-10 flex flex-col h-full min-h-[600px]">
           <div className="flex flex-col items-center justify-center mt-4 mb-10">
-            <div className="w-20 h-20 bg-cusens-primary/10 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
-              <span className="material-icons text-5xl text-cusens-primary">account_balance</span>
-            </div>
-            <h1 className="text-3xl font-bold text-cusens-text-primary tracking-tight">CUSENS</h1>
+            <BrandLogo
+              size="xl"
+              className="flex-col gap-4 text-center"
+              tagline="Citizen action platform"
+              taglineClassName="uppercase tracking-[0.14em]"
+            />
           </div>
 
           <form className="space-y-5" onSubmit={handleSubmit}>

@@ -3,6 +3,7 @@ import { useForm } from '@tanstack/react-form';
 import { Link, useRouter } from '@tanstack/react-router';
 import InputField from '../components/InputField';
 import Button from '../components/Button';
+import BrandLogo from '../components/BrandLogo';
 import getFieldError from '../forms/getFieldError';
 import useFormSubmitHandler from '../forms/useFormSubmitHandler';
 import { registerUser } from '../requests';
@@ -70,7 +71,7 @@ const Register = () => {
         >
           <span className="material-icons">chevron_left</span>
         </button>
-        <div className="font-display font-bold text-lg tracking-tight text-cusens-primary">CUSENS</div>
+        <BrandLogo size="xs" />
         <div className="w-10"></div>
       </header>
 

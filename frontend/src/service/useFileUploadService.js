@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { uploadProfilePicture } from './FileUploadService';
 
+const MAX_PROFILE_PICTURE_SOURCE_SIZE = 20 * 1024 * 1024;
 const MAX_PROFILE_PICTURE_SIZE = 5 * 1024 * 1024;
 
 const getErrorMessage = (error) => {
@@ -16,7 +17,7 @@ const getErrorMessage = (error) => {
   return error?.message || 'Could not upload profile picture. Please try again.';
 };
 
-export const validateProfilePictureFile = (file) => {
+const validateImageFileType = (file) => {
   if (!file) {
     throw new Error('Please select an image file.');
   }
@@ -24,6 +25,18 @@ export const validateProfilePictureFile = (file) => {
   if (!file.type?.startsWith('image/')) {
     throw new Error('Only image files are allowed.');
   }
+};
+
+export const validateProfilePictureSourceFile = (file) => {
+  validateImageFileType(file);
+
+  if (file.size > MAX_PROFILE_PICTURE_SOURCE_SIZE) {
+    throw new Error('Image file must be 20MB or smaller.');
+  }
+};
+
+export const validateProfilePictureFile = (file) => {
+  validateImageFileType(file);
 
   if (file.size > MAX_PROFILE_PICTURE_SIZE) {
     throw new Error('Image file must be 5MB or smaller.');

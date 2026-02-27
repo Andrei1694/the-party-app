@@ -1,3 +1,5 @@
+import BrandLogo from '../BrandLogo';
+
 const TopNavbar = ({ title, onMenuClick, userLabel, userAvatarUrl, onProfileClick }) => {
   return (
     <header className="sticky top-0 z-30 border-b border-cusens-border bg-cusens-surface/95 backdrop-blur-md">
@@ -12,7 +14,10 @@ const TopNavbar = ({ title, onMenuClick, userLabel, userAvatarUrl, onProfileClic
         </button>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-cusens-text-secondary">CUSENS</p>
+          <div className="mb-1 inline-flex items-center gap-2">
+            <BrandLogo size="xs" showWordmark={false} />
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-cusens-text-secondary">CUSENS</p>
+          </div>
           <h1 className="truncate text-lg font-bold leading-tight text-cusens-text-primary">{title}</h1>
         </div>
 
@@ -22,11 +27,9 @@ const TopNavbar = ({ title, onMenuClick, userLabel, userAvatarUrl, onProfileClic
           className="inline-flex max-w-[12rem] items-center gap-2 rounded-full border border-cusens-border bg-cusens-surface px-2 py-1 transition-colors hover:bg-cusens-surface-muted"
           aria-label="Open profile"
         >
-          <img
-            src={userAvatarUrl}
-            alt={`${userLabel} avatar`}
-            className="h-8 w-8 rounded-full border border-cusens-border object-cover"
-          />
+          <span className="h-8 w-8 shrink-0 overflow-hidden rounded-full border border-cusens-border bg-cusens-bg">
+            <img src={userAvatarUrl} alt={`${userLabel} avatar`} className="h-full w-full object-cover" />
+          </span>
           <span className="hidden truncate text-sm font-semibold text-cusens-text-primary sm:inline">{userLabel}</span>
         </button>
       </div>

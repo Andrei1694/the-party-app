@@ -1,9 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useForm, useStore } from '@tanstack/react-form';
 import { useAuth } from '../auth/AuthContext';
+import ImageCropDialog from '../components/image/ImageCropDialog';
 import getFieldError from '../forms/getFieldError';
 import useFormSubmitHandler from '../forms/useFormSubmitHandler';
-import { useFileUploadService } from '../service/useFileUploadService';
+import {
+  useFileUploadService,
+  validateProfilePictureSourceFile,
+} from '../service/useFileUploadService';
+import { processImageForUpload } from '../utils/image/processImageForUpload';
 
 const DEFAULT_AVATAR_URL = 'https://lh3.googleusercontent.com/aida-public/AB6AXuD7cbnwFcAoyOb5pOj744xfX7_cAy6Ugq1YRcDnUrEVaKSYqKlk4ZzDZw9sBVYTIHe_EBpEwhbBrT7l2rAcru-k3g_b8YkjAPWe_T42Hju-7OT_JINXzdE-jt0zyjKnnAIes_8YKHehNzLb-FExOKEGuhtu_gYOd2tjcvniKNxYzKjtTk9GWEessHgFR879XlRoXkoNIs0pzZMTSpRV7oIH5dogZfvbD8FEGA4CpkaLtBbAAyufOoeBrCe1-yxJfqJkycLR5BBaro8f';
 
@@ -67,11 +72,16 @@ const buildProfileUpdatePayloadFromProfile = (profile, profilePictureUrlOverride
 const Profile = () => {
   const { user, updateProfile } = useAuth();
   const profilePictureInputRef = useRef(null);
+  const pendingSourceImageUrlRef = useRef('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [uploadError, setUploadError] = useState('');
   const [uploadSuccess, setUploadSuccess] = useState('');
   const [isPersistingUploadedPicture, setIsPersistingUploadedPicture] = useState(false);
+  const [isCropDialogOpen, setIsCropDialogOpen] = useState(false);
+  const [pendingSourceFile, setPendingSourceFile] = useState(null);
+  const [pendingSourceImageUrl, setPendingSourceImageUrl] = useState('');
+  const [isProcessingPicture, setIsProcessingPicture] = useState(false);
   const fileUploadMutation = useFileUploadService();
 
   const form = useForm({
@@ -117,28 +127,116 @@ const Profile = () => {
 
   const avatarUrl = formValues.profilePictureUrl.trim() || DEFAULT_AVATAR_URL;
   const isUploadingPicture = fileUploadMutation.isPending;
-  const isPictureActionPending = isUploadingPicture || isPersistingUploadedPicture;
-  const pictureStatusMessage = isUploadingPicture
-    ? 'Uploading profile picture...'
-    : isPersistingUploadedPicture
-      ? 'Saving profile picture...'
-      : '';
+  const isPictureActionPending = isProcessingPicture || isUploadingPicture || isPersistingUploadedPicture;
+  const pictureStatusMessage = isProcessingPicture
+    ? 'Preparing profile picture...'
+    : isUploadingPicture
+      ? 'Uploading profile picture...'
+      : isPersistingUploadedPicture
+        ? 'Saving profile picture...'
+        : '';
 
-  const handleProfilePictureUpload = async (event) => {
+  const resetPictureFeedback = () => {
+    setError('');
+    setSuccess('');
+    setUploadError('');
+    setUploadSuccess('');
+    setIsPersistingUploadedPicture(false);
+  };
+
+  const clearPendingSourceImage = () => {
+    if (pendingSourceImageUrlRef.current) {
+      URL.revokeObjectURL(pendingSourceImageUrlRef.current);
+      pendingSourceImageUrlRef.current = '';
+    }
+    setPendingSourceImageUrl('');
+    setPendingSourceFile(null);
+  };
+
+  const setPendingSourceImage = (selectedFile) => {
+    const sourceImageUrl = URL.createObjectURL(selectedFile);
+    if (pendingSourceImageUrlRef.current) {
+      URL.revokeObjectURL(pendingSourceImageUrlRef.current);
+    }
+
+    pendingSourceImageUrlRef.current = sourceImageUrl;
+    setPendingSourceFile(selectedFile);
+    setPendingSourceImageUrl(sourceImageUrl);
+  };
+
+  useEffect(
+    () => () => {
+      if (pendingSourceImageUrlRef.current) {
+        URL.revokeObjectURL(pendingSourceImageUrlRef.current);
+      }
+    },
+    [],
+  );
+
+  const handleProfilePictureUpload = (event) => {
     const selectedFile = event.target.files?.[0];
     event.target.value = '';
     if (!selectedFile) {
       return;
     }
 
-    setError('');
-    setSuccess('');
-    setUploadError('');
-    setUploadSuccess('');
-    setIsPersistingUploadedPicture(false);
+    resetPictureFeedback();
+    setIsProcessingPicture(false);
 
     try {
-      const { fileUrl } = await fileUploadMutation.mutateAsync(selectedFile);
+      validateProfilePictureSourceFile(selectedFile);
+      setPendingSourceImage(selectedFile);
+      setIsCropDialogOpen(true);
+    } catch (validationFailure) {
+      clearPendingSourceImage();
+      setIsCropDialogOpen(false);
+      setUploadError(getBackendErrorMessage(validationFailure, 'Could not process profile picture.'));
+    }
+  };
+
+  const handleCropDialogCancel = () => {
+    if (isProcessingPicture) {
+      return;
+    }
+
+    setIsCropDialogOpen(false);
+    clearPendingSourceImage();
+  };
+
+  const handleCropDialogConfirm = async (cropAreaPixels) => {
+    if (!pendingSourceFile) {
+      return;
+    }
+
+    resetPictureFeedback();
+    setIsProcessingPicture(true);
+
+    let processedFile = null;
+
+    try {
+      processedFile = await processImageForUpload({
+        file: pendingSourceFile,
+        cropAreaPixels,
+      });
+    } catch (processingFailure) {
+      setUploadError(
+        getBackendErrorMessage(
+          processingFailure,
+          'Could not process profile picture. Please try a different image.',
+        ),
+      );
+      setIsProcessingPicture(false);
+      setIsCropDialogOpen(false);
+      clearPendingSourceImage();
+      return;
+    }
+
+    setIsProcessingPicture(false);
+    setIsCropDialogOpen(false);
+    clearPendingSourceImage();
+
+    try {
+      const { fileUrl } = await fileUploadMutation.mutateAsync(processedFile);
       form.setFieldValue('profilePictureUrl', fileUrl);
 
       setIsPersistingUploadedPicture(true);
@@ -195,11 +293,9 @@ const Profile = () => {
               aria-label="Change profile picture"
               className="group relative rounded-full focus:outline-none focus:ring-2 focus:ring-cusens-primary focus:ring-offset-2 focus:ring-offset-cusens-surface disabled:cursor-not-allowed disabled:opacity-80"
             >
-              <div
-                className="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-28 w-28 shadow-md border-4 border-cusens-primary/15 transition-transform duration-200 group-hover:scale-[1.03]"
-                data-alt="User avatar"
-                style={{ backgroundImage: `url("${avatarUrl}")` }}
-              ></div>
+              <span className="block h-28 w-28 overflow-hidden rounded-full border-4 border-cusens-primary shadow-md transition-transform duration-200 group-hover:scale-[1.03]">
+                <img src={avatarUrl} alt={`${displayName} avatar`} className="h-full w-full object-cover" />
+              </span>
               <span className="absolute -bottom-1 -right-1 inline-flex h-9 w-9 items-center justify-center rounded-full border-2 border-cusens-surface bg-cusens-primary text-cusens-text-primary shadow-md">
                 <span className="material-icons text-[18px]">photo_camera</span>
               </span>
@@ -556,6 +652,16 @@ const Profile = () => {
           </div>
         </main>
       </div>
+      {isCropDialogOpen && (
+        <ImageCropDialog
+          open={isCropDialogOpen}
+          imageSrc={pendingSourceImageUrl}
+          aspect={1}
+          isProcessing={isProcessingPicture}
+          onCancel={handleCropDialogCancel}
+          onConfirm={handleCropDialogConfirm}
+        />
+      )}
     </div>
   );
 };

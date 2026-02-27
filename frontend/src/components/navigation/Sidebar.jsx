@@ -1,4 +1,5 @@
 import isPathActive from '../../navigation/isPathActive';
+import BrandLogo from '../BrandLogo';
 
 const Sidebar = ({ navItems, currentPath, onNavigate, onLogout, mobile, open, onClose }) => {
   const wrapperClassName = mobile
@@ -27,7 +28,7 @@ const Sidebar = ({ navItems, currentPath, onNavigate, onLogout, mobile, open, on
       <aside className={panelClassName} role={mobile ? 'dialog' : undefined} aria-modal={mobile ? true : undefined}>
         <div className="flex items-center justify-between border-b border-cusens-border px-5 py-5">
           <div>
-            <p className="text-sm font-bold tracking-[0.2em] text-cusens-primary">CUSENS</p>
+            <BrandLogo size="sm" />
             <p className="text-xs text-cusens-text-secondary">Navigation</p>
           </div>
           {mobile && (
