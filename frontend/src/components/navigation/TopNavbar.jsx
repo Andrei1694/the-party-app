@@ -5,7 +5,7 @@ const TopNavbar = ({ title, onMenuClick, userLabel }) => {
         <button
           type="button"
           onClick={onMenuClick}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full text-cusens-primary active:bg-gray-100 md:hidden"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-full text-cusens-primary active:bg-cusens-surface-muted md:hidden"
           aria-label="Open navigation menu"
         >
           <span className="material-icons">menu</span>
@@ -13,12 +13,12 @@ const TopNavbar = ({ title, onMenuClick, userLabel }) => {
 
         <div className="flex min-w-0 flex-1 flex-col">
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-cusens-text-secondary">CUSENS</p>
-          <h1 className="truncate text-lg font-bold leading-tight text-gray-900">{title}</h1>
+          <h1 className="truncate text-lg font-bold leading-tight text-cusens-text-primary">{title}</h1>
         </div>
 
-        <div className="hidden max-w-[16rem] items-center gap-2 rounded-full border border-cusens-border bg-white px-3 py-2 md:flex">
+        <div className="hidden max-w-[16rem] items-center gap-2 rounded-full border border-cusens-border bg-cusens-surface px-3 py-2 md:flex">
           <span className="material-icons text-cusens-primary">account_circle</span>
-          <span className="truncate text-sm font-semibold text-gray-700">{userLabel}</span>
+          <span className="truncate text-sm font-semibold text-cusens-text-primary">{userLabel}</span>
         </div>
       </div>
     </header>

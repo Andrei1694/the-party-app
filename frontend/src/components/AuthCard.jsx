@@ -3,10 +3,10 @@ import React from 'react';
 
 const AuthCard = ({ children }) => {
   return (
-    <div className="w-full max-w-sm mx-auto bg-cusens-surface rounded-3xl shadow-xl overflow-hidden border border-gray-100 relative">
+    <div className="w-full max-w-sm mx-auto bg-cusens-surface rounded-3xl shadow-xl overflow-hidden border border-cusens-border relative">
       <div className="h-12 w-full flex justify-between items-center px-6 pt-2">
-        <span className="text-sm font-semibold text-gray-900">9:41</span>
-        <div className="flex space-x-2 text-gray-900">
+        <span className="text-sm font-semibold text-cusens-text-primary">9:41</span>
+        <div className="flex space-x-2 text-cusens-text-primary">
           <span className="material-icons text-sm">signal_cellular_alt</span>
           <span className="material-icons text-sm">wifi</span>
           <span className="material-icons text-sm">battery_full</span>

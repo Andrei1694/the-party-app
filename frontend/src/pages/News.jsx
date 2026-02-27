@@ -56,7 +56,7 @@ const News = () => {
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-cusens-primary">Newsroom</p>
-                <h2 className="mt-2 text-2xl font-bold text-gray-900 sm:text-3xl">Latest Updates</h2>
+                <h2 className="mt-2 text-2xl font-bold text-cusens-text-primary sm:text-3xl">Latest Updates</h2>
                 <p className="mt-2 max-w-3xl text-sm text-cusens-text-secondary">
                   Live data from backend endpoint <code>/api/news</code>.
                 </p>
@@ -65,7 +65,7 @@ const News = () => {
               <button
                 type="button"
                 onClick={() => refetch()}
-                className="inline-flex items-center gap-2 rounded-xl border border-cusens-border bg-white px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                className="inline-flex items-center gap-2 rounded-xl border border-cusens-border bg-white px-3 py-2 text-sm font-semibold text-cusens-text-primary hover:bg-cusens-bg"
                 disabled={isFetching}
               >
                 <span className="material-icons text-[18px]">refresh</span>
@@ -97,7 +97,7 @@ const News = () => {
               <div className="mb-3 inline-flex rounded-full bg-cusens-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-cusens-primary">
                 Featured
               </div>
-              <h3 className="text-xl font-bold text-gray-900 sm:text-2xl group-hover:text-cusens-primary">
+              <h3 className="text-xl font-bold text-cusens-text-primary sm:text-2xl group-hover:text-cusens-primary">
                 {featuredNews.title}
               </h3>
               <p className="mt-3 text-sm leading-relaxed text-cusens-text-secondary">{getExcerpt(featuredNews.content)}</p>
@@ -130,7 +130,7 @@ const News = () => {
                     <span>Article #{item.id}</span>
                     <span>Backend Feed</span>
                   </div>
-                  <h4 className="text-lg font-bold text-gray-900 group-hover:text-cusens-primary">{item.title}</h4>
+                  <h4 className="text-lg font-bold text-cusens-text-primary group-hover:text-cusens-primary">{item.title}</h4>
                   <p className="mt-2 text-sm leading-relaxed text-cusens-text-secondary">{getExcerpt(item.content)}</p>
                   <p className="mt-4 text-sm font-semibold text-cusens-primary">Read full article</p>
                 </article>

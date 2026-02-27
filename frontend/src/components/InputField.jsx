@@ -16,17 +16,17 @@ const InputField = ({
 }) => {
   return (
     <div className="group">
-      <label className="block text-sm font-medium text-gray-700 mb-1.5 ml-1" htmlFor={id}>
+      <label className="mb-1.5 ml-1 block text-sm font-medium text-cusens-text-primary" htmlFor={id}>
         {label}
       </label>
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <span className="material-icons text-gray-400 text-xl group-focus-within:text-cusens-primary transition-colors">
+          <span className="material-icons text-cusens-text-secondary text-xl group-focus-within:text-cusens-primary transition-colors">
             {icon}
           </span>
         </div>
         <input
-          className="block w-full pl-10 pr-3 py-3 border border-cusens-border rounded-xl leading-5 bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cusens-primary focus:border-cusens-primary sm:text-sm transition duration-200 ease-in-out"
+          className="block w-full rounded-xl border border-cusens-border bg-cusens-surface py-3 pl-10 pr-3 leading-5 text-cusens-text-primary placeholder-cusens-text-secondary/70 transition duration-200 ease-in-out focus:border-cusens-primary focus:outline-none focus:ring-2 focus:ring-cusens-primary sm:text-sm"
           id={id}
           name={name}
           type={type}
@@ -38,7 +38,7 @@ const InputField = ({
         />
         {showVisibilityToggle && (
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer">
-            <span className="material-icons text-gray-400 hover:text-gray-600 text-xl transition-colors">
+            <span className="material-icons text-cusens-text-secondary hover:text-cusens-text-primary text-xl transition-colors">
               visibility_off
             </span>
           </div>

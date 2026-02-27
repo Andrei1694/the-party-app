@@ -35,7 +35,7 @@ const Sidebar = ({ navItems, currentPath, onNavigate, onLogout, mobile, open, on
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full text-cusens-primary active:bg-gray-100"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full text-cusens-primary active:bg-cusens-surface-muted"
               aria-label="Close sidebar"
             >
               <span className="material-icons">close</span>
@@ -54,8 +54,8 @@ const Sidebar = ({ navItems, currentPath, onNavigate, onLogout, mobile, open, on
                 onClick={() => onNavigate(item.to)}
                 className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-semibold transition-colors ${
                   active
-                    ? 'bg-cusens-primary text-white shadow-sm'
-                    : 'text-gray-700 hover:bg-gray-100 active:bg-gray-200'
+                    ? 'bg-cusens-primary text-cusens-text-primary shadow-sm'
+                    : 'text-cusens-text-primary hover:bg-cusens-bg active:bg-cusens-surface-muted'
                 }`}
               >
                 <span className="material-icons text-[20px]">{item.icon}</span>

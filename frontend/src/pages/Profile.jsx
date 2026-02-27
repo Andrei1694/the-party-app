@@ -181,11 +181,11 @@ const Profile = () => {
   };
 
   const inputClassName =
-    'block w-full px-3 py-3 border border-cusens-border rounded-xl leading-5 bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cusens-primary focus:border-cusens-primary sm:text-sm transition duration-200 ease-in-out';
+    'block w-full px-3 py-3 border border-cusens-border rounded-xl leading-5 bg-cusens-bg text-cusens-text-primary placeholder-cusens-text-secondary/70 focus:outline-none focus:ring-2 focus:ring-cusens-primary focus:border-cusens-primary sm:text-sm transition duration-200 ease-in-out';
 
   return (
     <div className="bg-cusens-bg font-display flex items-start justify-center">
-      <div className="w-full max-w-md bg-cusens-surface rounded-3xl shadow-xl overflow-hidden border border-gray-100 relative flex flex-col">
+      <div className="w-full max-w-md bg-cusens-surface rounded-3xl shadow-xl overflow-hidden border border-cusens-border relative flex flex-col">
         <main className="flex-1 overflow-y-auto px-6 pb-24 pt-6">
           <div className="flex flex-col items-center gap-4">
             <div
@@ -194,21 +194,21 @@ const Profile = () => {
               style={{ backgroundImage: `url("${avatarUrl}")` }}
             ></div>
             <div className="flex flex-col items-center justify-center">
-              <p className="text-gray-900 text-xl font-bold leading-tight text-center">{displayName}</p>
+              <p className="text-cusens-text-primary text-xl font-bold leading-tight text-center">{displayName}</p>
               <p className="text-cusens-text-secondary text-sm font-medium text-center">Level 5 - Active Citizen</p>
 			  <p className="text-cusens-text-secondary text-sm font-medium text-center">{user?.code}</p>
             </div>
           </div>
 
           <section className="pt-6">
-            <h2 className="text-gray-900 text-lg font-bold leading-tight tracking-tight mb-4">Edit Profile</h2>
+            <h2 className="text-cusens-text-primary text-lg font-bold leading-tight tracking-tight mb-4">Edit Profile</h2>
 
             <form className="space-y-4" onSubmit={handleSubmit}>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <form.Field name="firstName">
                   {(field) => (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="firstName">
+                      <label className="block text-sm font-medium text-cusens-text-primary mb-1.5" htmlFor="firstName">
                         First Name
                       </label>
                       <input
@@ -228,7 +228,7 @@ const Profile = () => {
                 <form.Field name="lastName">
                   {(field) => (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="lastName">
+                      <label className="block text-sm font-medium text-cusens-text-primary mb-1.5" htmlFor="lastName">
                         Last Name
                       </label>
                       <input
@@ -250,7 +250,7 @@ const Profile = () => {
                 <form.Field name="telefon">
                   {(field) => (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="telefon">
+                      <label className="block text-sm font-medium text-cusens-text-primary mb-1.5" htmlFor="telefon">
                         Phone
                       </label>
                       <input
@@ -270,7 +270,7 @@ const Profile = () => {
                 <form.Field name="dateOfBirth">
                   {(field) => (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="dateOfBirth">
+                      <label className="block text-sm font-medium text-cusens-text-primary mb-1.5" htmlFor="dateOfBirth">
                         Date of Birth
                       </label>
                       <input
@@ -291,7 +291,7 @@ const Profile = () => {
                 <form.Field name="sex">
                   {(field) => (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="sex">
+                      <label className="block text-sm font-medium text-cusens-text-primary mb-1.5" htmlFor="sex">
                         Sex
                       </label>
                       <select
@@ -332,7 +332,7 @@ const Profile = () => {
                 >
                   {(field) => (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="cnp">
+                      <label className="block text-sm font-medium text-cusens-text-primary mb-1.5" htmlFor="cnp">
                         CNP
                       </label>
                       <input
@@ -355,7 +355,7 @@ const Profile = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="profilePictureFile">
+                <label className="block text-sm font-medium text-cusens-text-primary mb-1.5" htmlFor="profilePictureFile">
                   Upload Profile Picture
                 </label>
                 <input
@@ -375,7 +375,7 @@ const Profile = () => {
               <form.Field name="profilePictureUrl">
                 {(field) => (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="profilePictureUrl">
+                    <label className="block text-sm font-medium text-cusens-text-primary mb-1.5" htmlFor="profilePictureUrl">
                       Profile Picture URL
                     </label>
                     <input
@@ -395,7 +395,7 @@ const Profile = () => {
               <form.Field name="address">
                 {(field) => (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="address">
+                    <label className="block text-sm font-medium text-cusens-text-primary mb-1.5" htmlFor="address">
                       Address
                     </label>
                     <textarea
@@ -414,7 +414,7 @@ const Profile = () => {
               <form.Field name="bio">
                 {(field) => (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="bio">
+                    <label className="block text-sm font-medium text-cusens-text-primary mb-1.5" htmlFor="bio">
                       Bio
                     </label>
                     <textarea
@@ -445,7 +445,7 @@ const Profile = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting || !canSubmit || isPictureActionPending}
-                    className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-md text-sm font-bold text-white bg-cusens-primary hover:bg-cusens-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cusens-primary transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
+                    className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-md text-sm font-bold text-cusens-text-primary bg-cusens-primary hover:bg-cusens-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cusens-primary transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
                   >
                     {isSubmitting ? 'Saving...' : 'Save Profile'}
                   </button>
@@ -457,7 +457,7 @@ const Profile = () => {
           <div className="flex flex-col gap-2 pt-6">
             <div className="flex justify-between items-center">
               <p className="text-cusens-text-secondary text-xs font-semibold uppercase tracking-wide">Next Level</p>
-              <p className="text-gray-900 text-sm font-bold">1200 / 2000 XP</p>
+              <p className="text-cusens-text-primary text-sm font-bold">1200 / 2000 XP</p>
             </div>
             <div className="rounded-full bg-gray-200 h-2.5 shadow-inner">
               <div className="h-full rounded-full bg-cusens-primary" style={{ width: '60%' }}></div>
@@ -465,36 +465,36 @@ const Profile = () => {
           </div>
 
           <div className="pt-6">
-            <h2 className="text-gray-900 text-lg font-bold leading-tight tracking-tight mb-4">Impact Stats</h2>
+            <h2 className="text-cusens-text-primary text-lg font-bold leading-tight tracking-tight mb-4">Impact Stats</h2>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div className="bg-white border border-cusens-border p-4 rounded-2xl shadow-sm flex flex-col items-center justify-center text-center">
                 <span className="material-icons text-cusens-primary text-3xl mb-2">how_to_vote</span>
-                <p className="text-xl font-bold text-gray-900">1,250</p>
+                <p className="text-xl font-bold text-cusens-text-primary">1,250</p>
                 <p className="text-xs text-cusens-text-secondary">Voters Reached</p>
               </div>
               <div className="bg-white border border-cusens-border p-4 rounded-2xl shadow-sm flex flex-col items-center justify-center text-center">
                 <span className="material-icons text-cusens-primary text-3xl mb-2">edit_document</span>
-                <p className="text-xl font-bold text-gray-900">82</p>
+                <p className="text-xl font-bold text-cusens-text-primary">82</p>
                 <p className="text-xs text-cusens-text-secondary">Petitions Signed</p>
               </div>
               <div className="bg-white border border-cusens-border p-4 rounded-2xl shadow-sm flex flex-col items-center justify-center text-center">
                 <span className="material-icons text-cusens-primary text-3xl mb-2">door_front</span>
-                <p className="text-xl font-bold text-gray-900">58</p>
+                <p className="text-xl font-bold text-cusens-text-primary">58</p>
                 <p className="text-xs text-cusens-text-secondary">Doors Knocked</p>
               </div>
               <div className="bg-white border border-cusens-border p-4 rounded-2xl shadow-sm flex flex-col items-center justify-center text-center">
                 <span className="material-icons text-cusens-primary text-3xl mb-2">call</span>
-                <p className="text-xl font-bold text-gray-900">312</p>
+                <p className="text-xl font-bold text-cusens-text-primary">312</p>
                 <p className="text-xs text-cusens-text-secondary">Calls Made</p>
               </div>
             </div>
           </div>
 
           <div className="pt-6">
-            <h2 className="text-gray-900 text-lg font-bold leading-tight tracking-tight mb-4">Achievements</h2>
+            <h2 className="text-cusens-text-primary text-lg font-bold leading-tight tracking-tight mb-4">Achievements</h2>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div className="flex flex-col gap-3 text-center items-center">
-                <div className="p-2 bg-gray-50 rounded-full">
+                <div className="p-2 bg-cusens-bg rounded-full">
                   <div
                     className="w-20 h-20 bg-center bg-no-repeat aspect-square bg-cover rounded-full border-4 border-cusens-primary/20"
                     data-alt="Gold medal icon for Phone Bank Pro achievement"
@@ -502,12 +502,12 @@ const Profile = () => {
                   ></div>
                 </div>
                 <div>
-                  <p className="text-gray-900 text-sm font-bold leading-normal">Phone Bank Pro</p>
+                  <p className="text-cusens-text-primary text-sm font-bold leading-normal">Phone Bank Pro</p>
                   <p className="text-cusens-text-secondary text-xs font-normal leading-normal">Made 100 calls</p>
                 </div>
               </div>
               <div className="flex flex-col gap-3 text-center items-center">
-                <div className="p-2 bg-gray-50 rounded-full">
+                <div className="p-2 bg-cusens-bg rounded-full">
                   <div
                     className="w-20 h-20 bg-center bg-no-repeat aspect-square bg-cover rounded-full border-4 border-cusens-primary/20"
                     data-alt="Gold medal icon for Community Canvasser achievement"
@@ -515,12 +515,12 @@ const Profile = () => {
                   ></div>
                 </div>
                 <div>
-                  <p className="text-gray-900 text-sm font-bold leading-normal">Community Canvasser</p>
+                  <p className="text-cusens-text-primary text-sm font-bold leading-normal">Community Canvasser</p>
                   <p className="text-cusens-text-secondary text-xs font-normal leading-normal">Knocked on 50 doors</p>
                 </div>
               </div>
               <div className="flex flex-col gap-3 text-center items-center">
-                <div className="p-2 bg-gray-50 rounded-full">
+                <div className="p-2 bg-cusens-bg rounded-full">
                   <div
                     className="w-20 h-20 bg-center bg-no-repeat aspect-square bg-cover rounded-full border-4 border-cusens-primary/20"
                     data-alt="Gold medal icon for Voter Registration Champion achievement"
@@ -528,12 +528,12 @@ const Profile = () => {
                   ></div>
                 </div>
                 <div>
-                  <p className="text-gray-900 text-sm font-bold leading-normal">Voter Champion</p>
+                  <p className="text-cusens-text-primary text-sm font-bold leading-normal">Voter Champion</p>
                   <p className="text-cusens-text-secondary text-xs font-normal leading-normal">Registered 10 voters</p>
                 </div>
               </div>
               <div className="flex flex-col gap-3 text-center items-center opacity-60">
-                <div className="p-2 bg-gray-50 rounded-full">
+                <div className="p-2 bg-cusens-bg rounded-full">
                   <div
                     className="w-20 h-20 bg-center bg-no-repeat aspect-square bg-cover rounded-full border-4 border-gray-200"
                     data-alt="Locked achievement icon"
@@ -541,7 +541,7 @@ const Profile = () => {
                   ></div>
                 </div>
                 <div>
-                  <p className="text-gray-900 text-sm font-bold leading-normal">First Donation</p>
+                  <p className="text-cusens-text-primary text-sm font-bold leading-normal">First Donation</p>
                   <p className="text-cusens-text-secondary text-xs font-normal leading-normal">Make a donation</p>
                 </div>
               </div>
@@ -549,26 +549,26 @@ const Profile = () => {
           </div>
 
           <div className="pt-6">
-            <h2 className="text-gray-900 text-lg font-bold leading-tight tracking-tight mb-4">Shareable Milestones</h2>
+            <h2 className="text-cusens-text-primary text-lg font-bold leading-tight tracking-tight mb-4">Shareable Milestones</h2>
             <div className="space-y-4">
-              <div className="bg-cusens-primary text-white p-6 rounded-2xl shadow-md flex flex-col items-center text-center">
+              <div className="bg-cusens-primary text-cusens-text-primary p-6 rounded-2xl shadow-md flex flex-col items-center text-center">
                 <span className="material-icons text-4xl mb-3">celebration</span>
                 <h3 className="text-xl font-bold">First 100 Calls!</h3>
                 <p className="mt-1 mb-4 opacity-90 text-sm">
                   You&apos;re a true advocate for change. Keep up the amazing work!
                 </p>
-                <button className="flex min-w-[120px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-white text-cusens-primary text-sm font-bold leading-normal shadow-md hover:bg-gray-100 transition-colors">
+                <button className="flex min-w-[120px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-white text-cusens-primary text-sm font-bold leading-normal shadow-md hover:bg-cusens-bg transition-colors">
                   <span className="material-icons mr-2 text-base">share</span>
                   <span className="truncate">Share</span>
                 </button>
               </div>
               <div className="bg-white border border-cusens-border p-6 rounded-2xl shadow-sm flex flex-col items-center text-center">
                 <span className="material-icons text-4xl mb-3 text-cusens-primary">rocket_launch</span>
-                <h3 className="text-xl font-bold text-gray-900">Reached Level 5!</h3>
+                <h3 className="text-xl font-bold text-cusens-text-primary">Reached Level 5!</h3>
                 <p className="mt-1 mb-4 text-cusens-text-secondary text-sm">
                   Your dedication is inspiring. You&apos;ve become an Active Citizen!
                 </p>
-                <button className="flex min-w-[120px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-cusens-primary text-white text-sm font-bold leading-normal shadow-md hover:bg-cusens-primary-hover transition-colors">
+                <button className="flex min-w-[120px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-cusens-primary text-cusens-text-primary text-sm font-bold leading-normal shadow-md hover:bg-cusens-primary-hover transition-colors">
                   <span className="material-icons mr-2 text-base">share</span>
                   <span className="truncate">Share</span>
                 </button>

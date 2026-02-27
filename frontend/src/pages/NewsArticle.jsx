@@ -114,7 +114,7 @@ const NewsArticle = () => {
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-cusens-primary">Newsroom</p>
-              <h2 className="mt-2 text-2xl font-bold text-gray-900 sm:text-3xl">{article.title}</h2>
+              <h2 className="mt-2 text-2xl font-bold text-cusens-text-primary sm:text-3xl">{article.title}</h2>
               <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-cusens-text-secondary">
                 Article #{article.id}
               </p>
@@ -122,7 +122,7 @@ const NewsArticle = () => {
             <button
               type="button"
               onClick={() => refetch()}
-              className="inline-flex items-center gap-2 rounded-xl border border-cusens-border bg-white px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+              className="inline-flex items-center gap-2 rounded-xl border border-cusens-border bg-white px-3 py-2 text-sm font-semibold text-cusens-text-primary hover:bg-cusens-bg"
               disabled={isFetching}
             >
               <span className="material-icons text-[18px]">refresh</span>

@@ -79,12 +79,12 @@ const Register = () => {
     <div className="w-full max-w-md bg-cusens-bg min-h-screen flex flex-col relative shadow-2xl overflow-hidden">
       <header className="px-6 py-4 flex items-center justify-between sticky top-0 z-10 bg-cusens-bg/95 backdrop-blur-md">
         <button
-          className="w-10 h-10 flex items-center justify-center rounded-full active:bg-gray-200 transition-colors text-cusens-blue"
+          className="w-10 h-10 flex items-center justify-center rounded-full active:bg-cusens-surface-muted transition-colors text-cusens-primary"
           onClick={handleGoBack}
         >
           <span className="material-icons">chevron_left</span>
         </button>
-        <div className="font-bold text-lg tracking-tight text-cusens-blue">CUSENS</div>
+        <div className="font-display font-bold text-lg tracking-tight text-cusens-primary">CUSENS</div>
         <div className="w-10"></div>
       </header>
 
@@ -185,7 +185,7 @@ const Register = () => {
             </div>
           </div>
 
-          <div className="h-px w-full bg-gray-200 my-6"></div>
+          <div className="h-px w-full bg-cusens-border my-6"></div>
 
           <div className="space-y-4">
             <h2 className="text-sm font-semibold uppercase tracking-wider text-cusens-text-secondary mb-2">
@@ -195,7 +195,7 @@ const Register = () => {
               {(field) => (
                 <div className="relative">
                   <select
-                    className="appearance-none block w-full px-4 py-3.5 bg-white border border-gray-300 rounded-xl text-cusens-text-primary focus:outline-none focus:ring-2 focus:ring-cusens-blue focus:border-transparent transition-all"
+                    className="appearance-none block w-full px-4 py-3.5 bg-cusens-surface border border-cusens-border rounded-xl text-cusens-text-primary focus:outline-none focus:ring-2 focus:ring-cusens-primary focus:border-transparent transition-all"
                     id="country"
                     name="country"
                     value={field.state.value}
@@ -226,7 +226,7 @@ const Register = () => {
               {(field) => (
                 <div className="relative">
                   <select
-                    className="appearance-none block w-full px-4 py-3.5 bg-white border border-gray-300 rounded-xl text-cusens-text-primary focus:outline-none focus:ring-2 focus:ring-cusens-blue focus:border-transparent transition-all"
+                    className="appearance-none block w-full px-4 py-3.5 bg-cusens-surface border border-cusens-border rounded-xl text-cusens-text-primary focus:outline-none focus:ring-2 focus:ring-cusens-primary focus:border-transparent transition-all"
                     id="language"
                     name="language"
                     value={field.state.value}
@@ -280,7 +280,7 @@ const Register = () => {
                   <label className="flex items-start gap-3 group cursor-pointer">
                     <div className="relative flex items-center pt-0.5">
                       <input
-                        className="peer h-5 w-5 cursor-pointer appearance-none rounded border border-gray-300 checked:bg-cusens-blue checked:border-cusens-blue focus:ring-2 focus:ring-cusens-blue/30 transition-all"
+                        className="peer h-5 w-5 cursor-pointer appearance-none rounded border border-cusens-border checked:bg-cusens-primary checked:border-cusens-primary focus:ring-2 focus:ring-cusens-primary/30 transition-all"
                         type="checkbox"
                         checked={field.state.value}
                         onBlur={field.handleBlur}
@@ -294,7 +294,7 @@ const Register = () => {
                       I agree to the{' '}
                       <Link
                         to="/privacy-policy"
-                        className="text-cusens-blue font-medium hover:underline underline-offset-2"
+                        className="text-cusens-primary font-medium hover:underline underline-offset-2"
                       >
                         Privacy Policy
                       </Link>{' '}
@@ -314,7 +314,7 @@ const Register = () => {
                 <label className="flex items-start gap-3 group cursor-pointer">
                   <div className="relative flex items-center pt-0.5">
                     <input
-                      className="peer h-5 w-5 cursor-pointer appearance-none rounded border border-gray-300 checked:bg-cusens-blue checked:border-cusens-blue focus:ring-2 focus:ring-cusens-blue/30 transition-all"
+                      className="peer h-5 w-5 cursor-pointer appearance-none rounded border border-cusens-border checked:bg-cusens-primary checked:border-cusens-primary focus:ring-2 focus:ring-cusens-primary/30 transition-all"
                       type="checkbox"
                       checked={field.state.value}
                       onBlur={field.handleBlur}
@@ -340,7 +340,7 @@ const Register = () => {
         )}
       </main>
 
-      <div className="absolute bottom-0 left-0 w-full bg-cusens-bg border-t border-gray-200 p-6 safe-pb z-20">
+      <div className="absolute bottom-0 left-0 w-full bg-cusens-bg border-t border-cusens-border p-6 safe-pb z-20">
         <form.Subscribe selector={(state) => state.isSubmitting}>
           {(isSubmitting) => (
             <Button type="submit" form="register-form" disabled={isSubmitting}>
@@ -355,7 +355,7 @@ const Register = () => {
         <div className="mt-4 text-center">
           <p className="text-sm text-cusens-text-secondary">
             Already have an account?
-            <Link to="/login" className="text-cusens-blue font-medium hover:underline">
+            <Link to="/login" className="text-cusens-primary font-medium hover:underline">
               Log in
             </Link>
           </p>

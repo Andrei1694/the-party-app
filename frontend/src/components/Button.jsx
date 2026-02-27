@@ -8,12 +8,12 @@ const Button = ({
   ...buttonProps
 }) => {
   const baseStyle =
-    'w-full flex justify-center py-3.5 px-4 border rounded-xl shadow-md text-sm font-bold transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0';
+    'w-full flex justify-center py-3.5 px-4 border rounded-xl shadow-md text-sm font-bold font-display transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0';
 
   const primaryStyle =
-    'border-transparent text-white bg-cusens-primary hover:bg-cusens-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cusens-primary transform hover:-translate-y-0.5';
+    'border-cusens-primary text-cusens-text-primary bg-cusens-primary hover:bg-cusens-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cusens-primary transform hover:-translate-y-0.5';
   const secondaryStyle =
-    'border-cusens-border text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200';
+    'border-cusens-border text-cusens-text-primary bg-cusens-surface hover:bg-cusens-bg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cusens-border';
 
   const buttonStyle = variant === 'primary' ? primaryStyle : secondaryStyle;
 

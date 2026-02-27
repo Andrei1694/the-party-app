@@ -33,14 +33,14 @@ const Users = () => {
     <section className="font-display">
       <div className="mx-auto w-full max-w-4xl overflow-hidden rounded-3xl border border-cusens-border bg-cusens-surface shadow-sm">
         <div className="border-b border-cusens-border px-6 py-5">
-          <h2 className="text-xl font-bold text-gray-900">Users</h2>
+          <h2 className="text-xl font-bold text-cusens-text-primary">Users</h2>
           <p className="text-sm text-cusens-text-secondary">Registered community members</p>
         </div>
 
         <ul className="divide-y divide-cusens-border">
           {data.content.map((user) => (
             <li key={user.id} className="px-6 py-4">
-              <p className="text-sm font-semibold text-gray-900">
+              <p className="text-sm font-semibold text-cusens-text-primary">
                 {user.username} <span className="text-cusens-text-secondary">({user.email})</span>
               </p>
               {user.userProfile && (

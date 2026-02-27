@@ -34,30 +34,30 @@ const Login = () => {
 
   return (
     <div className="bg-cusens-bg font-display min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-sm mx-auto bg-cusens-surface rounded-3xl shadow-xl overflow-hidden border border-gray-100 relative">
+      <div className="w-full max-w-sm mx-auto bg-cusens-surface rounded-3xl shadow-xl overflow-hidden border border-cusens-border relative">
         <div className="px-8 pt-8 pb-10 flex flex-col h-full min-h-[600px]">
           <div className="flex flex-col items-center justify-center mt-4 mb-10">
             <div className="w-20 h-20 bg-cusens-primary/10 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
               <span className="material-icons text-5xl text-cusens-primary">account_balance</span>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">CUSENS</h1>
+            <h1 className="text-3xl font-bold text-cusens-text-primary tracking-tight">CUSENS</h1>
           </div>
 
           <form className="space-y-5" onSubmit={handleSubmit}>
             <form.Field name="email">
               {(field) => (
                 <div className="group">
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5 ml-1" htmlFor="email">
+                  <label className="block text-sm font-medium text-cusens-text-primary mb-1.5 ml-1" htmlFor="email">
                     Email Address
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <span className="material-icons text-gray-400 text-xl group-focus-within:text-cusens-primary transition-colors">
+                      <span className="material-icons text-cusens-text-secondary text-xl group-focus-within:text-cusens-primary transition-colors">
                         mail_outline
                       </span>
                     </div>
                     <input
-                      className="block w-full pl-10 pr-3 py-3 border border-cusens-border rounded-xl leading-5 bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cusens-primary focus:border-cusens-primary sm:text-sm transition duration-200 ease-in-out"
+                      className="block w-full pl-10 pr-3 py-3 border border-cusens-border rounded-xl leading-5 bg-cusens-bg text-cusens-text-primary placeholder-cusens-text-secondary/70 focus:outline-none focus:ring-2 focus:ring-cusens-primary focus:border-cusens-primary sm:text-sm transition duration-200 ease-in-out"
                       id="email"
                       name="email"
                       type="email"
@@ -75,17 +75,17 @@ const Login = () => {
             <form.Field name="password">
               {(field) => (
                 <div className="group">
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5 ml-1" htmlFor="password">
+                  <label className="block text-sm font-medium text-cusens-text-primary mb-1.5 ml-1" htmlFor="password">
                     Password
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <span className="material-icons text-gray-400 text-xl group-focus-within:text-cusens-primary transition-colors">
+                      <span className="material-icons text-cusens-text-secondary text-xl group-focus-within:text-cusens-primary transition-colors">
                         lock_outline
                       </span>
                     </div>
                     <input
-                      className="block w-full pl-10 pr-10 py-3 border border-cusens-border rounded-xl leading-5 bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cusens-primary focus:border-cusens-primary sm:text-sm transition duration-200 ease-in-out"
+                      className="block w-full pl-10 pr-10 py-3 border border-cusens-border rounded-xl leading-5 bg-cusens-bg text-cusens-text-primary placeholder-cusens-text-secondary/70 focus:outline-none focus:ring-2 focus:ring-cusens-primary focus:border-cusens-primary sm:text-sm transition duration-200 ease-in-out"
                       id="password"
                       name="password"
                       type={showPassword ? 'text' : 'password'}
@@ -101,7 +101,7 @@ const Login = () => {
                       onClick={() => setShowPassword((prev) => !prev)}
                       aria-label={showPassword ? 'Hide password' : 'Show password'}
                     >
-                      <span className="material-icons text-gray-400 hover:text-gray-600 text-xl transition-colors">
+                      <span className="material-icons text-cusens-text-secondary hover:text-cusens-text-primary text-xl transition-colors">
                         {showPassword ? 'visibility' : 'visibility_off'}
                       </span>
                     </button>
@@ -129,7 +129,7 @@ const Login = () => {
             <form.Subscribe selector={(state) => state.isSubmitting}>
               {(isSubmitting) => (
                 <button
-                  className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-md text-sm font-bold text-white bg-cusens-primary hover:bg-cusens-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cusens-primary transition-all duration-200 transform hover:-translate-y-0.5 mt-2 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                  className="w-full flex justify-center py-3.5 px-4 border border-cusens-primary rounded-xl shadow-md text-sm font-bold text-cusens-text-primary bg-cusens-primary hover:bg-cusens-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cusens-primary transition-all duration-200 transform hover:-translate-y-0.5 mt-2 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                   type="submit"
                   disabled={isSubmitting}
                 >
@@ -148,7 +148,7 @@ const Login = () => {
             </div>
 
             <button
-              className="w-full flex justify-center py-3.5 px-4 border border-cusens-border rounded-xl shadow-sm text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200 transition-all duration-200"
+              className="w-full flex justify-center py-3.5 px-4 border border-cusens-border rounded-xl shadow-sm text-sm font-semibold text-cusens-text-primary bg-cusens-surface hover:bg-cusens-bg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cusens-border transition-all duration-200"
               type="button"
             >
               Continue as Guest
@@ -166,15 +166,15 @@ const Login = () => {
               </Link>
             </p>
             <div className="mt-8 flex justify-center space-x-4">
-              <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-              <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-              <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+              <span className="w-1 h-1 rounded-full bg-cusens-border"></span>
+              <span className="w-1 h-1 rounded-full bg-cusens-border"></span>
+              <span className="w-1 h-1 rounded-full bg-cusens-border"></span>
             </div>
           </div>
         </div>
 
         <div className="absolute bottom-2 left-0 right-0 flex justify-center pb-2 pointer-events-none">
-          <div className="w-32 h-1.5 bg-gray-900/20 rounded-full"></div>
+          <div className="w-32 h-1.5 bg-cusens-dark/20 rounded-full"></div>
         </div>
       </div>
     </div>
