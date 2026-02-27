@@ -15,4 +15,12 @@ public class UserDto implements Serializable {
 	private String password;
 	private UserProfileDto userProfile;
 	private String code;
+
+	// For registration input only - the referral code of another user
+	private String referralCode;
+
+	// Leveling info
+	private Integer currentLevel;
+	private Long currentXP;
+	private Long nextLevelXP;
 }

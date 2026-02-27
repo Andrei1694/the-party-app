@@ -17,6 +17,7 @@ const Register = () => {
       email: '',
       password: '',
       confirmPassword: '',
+      referralCode: '',
       country: 'Belgium',
       language: 'English',
       agreePrivacy: false,
@@ -26,10 +27,14 @@ const Register = () => {
       setError(null);
 
       try {
-        await registerUser({
+        const payload = {
           email: value.email,
           password: value.password,
-        });
+        };
+        if (value.referralCode.trim()) {
+          payload.referralCode = value.referralCode.trim().toUpperCase();
+        }
+        await registerUser(payload);
 
         router.navigate({
           to: '/login',
@@ -164,6 +169,22 @@ const Register = () => {
                 </form.Field>
               </div>
             </div>
+
+            <form.Field name="referralCode">
+              {(field) => (
+                <InputField
+                  label="Referral Code (Optional)"
+                  id="referral-code"
+                  name="referral-code"
+                  type="text"
+                  placeholder="Enter 4-character code"
+                  maxLength={4}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(event) => field.handleChange(event.target.value.toUpperCase())}
+                />
+              )}
+            </form.Field>
           </div>
 
           <div className="h-px w-full bg-cusens-border my-6"></div>

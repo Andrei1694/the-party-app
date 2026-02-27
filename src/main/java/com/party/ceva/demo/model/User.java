@@ -13,6 +13,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -40,8 +41,17 @@ public class User {
 	@JsonManagedReference
 	private UserProfile userProfile;
 
+	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JoinColumn(name = "level_id", referencedColumnName = "id")
+	@JsonManagedReference
+	private Level level;
+
 	@Column(unique = true, length = 4)
 	private String code;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "referred_by_id")
+	private User referredBy;
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	private Set<Role> roles = new HashSet<>();

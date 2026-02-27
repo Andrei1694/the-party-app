@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 
 import com.party.ceva.demo.dto.UserDto;
 import com.party.ceva.demo.dto.UserProfileDto;
+import com.party.ceva.demo.model.Level;
 import com.party.ceva.demo.model.User;
 import com.party.ceva.demo.model.UserProfile;
 import com.party.ceva.demo.repository.UserRepository;
@@ -30,24 +31,33 @@ public class UserService {
 
 	private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 	private static final Pattern CNP_PATTERN = Pattern.compile("^\\d{13}$");
+	private static final int REFERRAL_XP_REWARD = 1000;
 
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final CacheManager cacheManager;
 	private final CodeGenerationService codeGenerationService;
+	private final LevelingSystemService levelingSystemService;
 
 	public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, CacheManager cacheManager,
-			CodeGenerationService codeGenerationService) {
+			CodeGenerationService codeGenerationService, LevelingSystemService levelingSystemService) {
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.cacheManager = cacheManager;
 		this.codeGenerationService = codeGenerationService;
+		this.levelingSystemService = levelingSystemService;
 	}
 
 	public UserDto createUser(UserDto userDto) {
 		logger.info("Creating user for email {}", maskEmail(userDto.getEmail()));
 		User user = toEntity(userDto);
 		user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+		
+		// Initialize level for new user
+		if (user.getLevel() == null) {
+			user.setLevel(new Level());
+		}
+		
 		User savedUser = userRepository.save(user);
 		logger.info("Created user with id {}", savedUser.getId());
 		cacheManager.getCache("usersById").evict(savedUser.getId());
@@ -191,14 +201,47 @@ public class UserService {
 
 	public UserDto registerUser(UserDto userDto) {
 		logger.info("Registering user for email {}", maskEmail(userDto.getEmail()));
+
+		// Validate and process referral code if provided
+		User referrer = null;
+		String referralCode = userDto.getReferralCode();
+		if (referralCode != null && !referralCode.trim().isEmpty()) {
+			final String processedCode = referralCode.trim().toUpperCase();
+			referrer = userRepository.findByCode(processedCode)
+				.orElseThrow(() -> {
+					logger.warn("Registration rejected: referral code {} not found", processedCode);
+					return new ResponseStatusException(HttpStatus.BAD_REQUEST, "Referral code not found");
+				});
+
+			// Prevent self-referral
+			if (referrer.getEmail().equalsIgnoreCase(userDto.getEmail())) {
+				logger.warn("Registration rejected: self-referral attempt for {}", maskEmail(userDto.getEmail()));
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot use your own referral code");
+			}
+			logger.info("Valid referral code {} from user {}", referralCode, referrer.getId());
+		}
+
 		User user = new User();
 		user.setEmail(userDto.getEmail());
 		user.setPassword(passwordEncoder.encode(userDto.getPassword()));
 		user.setCode(generateUniqueCode());
+		user.setReferredBy(referrer);
+
+		// Initialize level for new registered user
+		user.setLevel(new Level());
+
 		User savedUser = userRepository.save(user);
 		cacheManager.getCache("usersById").evict(savedUser.getId());
 		cacheManager.getCache("usersByEmail").evict(savedUser.getEmail());
 		logger.info("Registered user {} with generated code", savedUser.getId());
+
+		// Award XP to referrer after successful registration
+		if (referrer != null) {
+			levelingSystemService.addXpToUser(referrer.getId(), REFERRAL_XP_REWARD);
+			logger.info("Awarded {} XP to referrer {} for referring user {}",
+				REFERRAL_XP_REWARD, referrer.getId(), savedUser.getId());
+		}
+
 		return toDto(savedUser);
 	}
 
@@ -226,6 +269,14 @@ public class UserService {
 		userDto.setId(user.getId());
 		userDto.setEmail(user.getEmail());
 		userDto.setCode(user.getCode());
+		
+		// Map Level info to DTO
+		if (user.getLevel() != null) {
+			userDto.setCurrentLevel(user.getLevel().getCurrentLevel());
+			userDto.setCurrentXP(user.getLevel().getCurrentXP());
+			userDto.setNextLevelXP(user.getLevel().getNextLevelXP());
+		}
+		
 		if (user.getUserProfile() != null) {
 			userDto.setUserProfile(toDto(user.getUserProfile()));
 		}
