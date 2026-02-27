@@ -1,12 +1,34 @@
 import { useState } from 'react';
 import { useForm } from '@tanstack/react-form';
-import { Link, useNavigate } from '@tanstack/react-router';
+import { Link, useNavigate, useRouter, useSearch } from '@tanstack/react-router';
 import { useAuth } from '../auth/AuthContext';
 import useFormSubmitHandler from '../forms/useFormSubmitHandler';
+
+const isSafeInternalRedirect = (redirectPath) => {
+  if (typeof redirectPath !== 'string' || !redirectPath.startsWith('/') || redirectPath.startsWith('//')) {
+    return false;
+  }
+
+  try {
+    const pathname = new URL(redirectPath, 'http://localhost').pathname;
+    if (pathname === '/login' || pathname.startsWith('/login/')) {
+      return false;
+    }
+    if (pathname === '/register' || pathname.startsWith('/register/')) {
+      return false;
+    }
+  } catch {
+    return false;
+  }
+
+  return true;
+};
 
 const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const router = useRouter();
+  const search = useSearch({ strict: false });
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
@@ -20,7 +42,12 @@ const Login = () => {
 
       try {
         await login(value);
-        navigate({ to: '/profile' });
+        const redirectPath = typeof search?.redirect === 'string' ? search.redirect : '';
+        if (isSafeInternalRedirect(redirectPath)) {
+          router.history.push(redirectPath);
+          return;
+        }
+        navigate({ to: '/news' });
       } catch {
         setError('Invalid credentials.');
       }

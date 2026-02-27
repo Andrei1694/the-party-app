@@ -5,7 +5,8 @@ import {
 } from '@tanstack/react-router';
 import App from './App';
 import ProtectedRoute from './auth/ProtectedRoute';
-import Home from './pages/Home';
+import PublicOnlyRoute from './auth/PublicOnlyRoute';
+import RootRedirectRoute from './auth/RootRedirectRoute';
 import Login from './pages/Login';
 import News from './pages/News';
 import NewsArticle from './pages/NewsArticle';
@@ -21,13 +22,17 @@ const rootRoute = createRootRoute({
 const homeRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  component: Home,
+  component: RootRedirectRoute,
 });
 
 const loginRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/login',
-  component: Login,
+  component: () => (
+    <PublicOnlyRoute>
+      <Login />
+    </PublicOnlyRoute>
+  ),
 });
 
 const newsRoute = createRoute({
