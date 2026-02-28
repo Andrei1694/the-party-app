@@ -201,6 +201,23 @@ public class UserService {
 
 	public UserDto registerUser(UserDto userDto) {
 		logger.info("Registering user for email {}", maskEmail(userDto.getEmail()));
+		UserProfileDto registrationProfile = userDto.getUserProfile();
+		if (registrationProfile == null) {
+			logger.warn("Registration rejected: userProfile is required for {}", maskEmail(userDto.getEmail()));
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User profile is required");
+		}
+
+		String firstName = normalizeNullable(registrationProfile.getFirstName());
+		if (firstName == null) {
+			logger.warn("Registration rejected: firstName is missing for {}", maskEmail(userDto.getEmail()));
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "First name is required");
+		}
+
+		String lastName = normalizeNullable(registrationProfile.getLastName());
+		if (lastName == null) {
+			logger.warn("Registration rejected: lastName is missing for {}", maskEmail(userDto.getEmail()));
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Last name is required");
+		}
 
 		// Validate and process referral code if provided
 		User referrer = null;
@@ -226,6 +243,15 @@ public class UserService {
 		user.setPassword(passwordEncoder.encode(userDto.getPassword()));
 		user.setCode(generateUniqueCode());
 		user.setReferredBy(referrer);
+
+		LocalDateTime now = LocalDateTime.now();
+		UserProfile userProfile = new UserProfile();
+		userProfile.setFirstName(firstName);
+		userProfile.setLastName(lastName);
+		userProfile.setSex(normalizeSexOrDefault(registrationProfile.getSex()));
+		userProfile.setCreatedAt(now);
+		userProfile.setUpdatedAt(now);
+		user.setUserProfile(userProfile);
 
 		// Initialize level for new registered user
 		user.setLevel(new Level());

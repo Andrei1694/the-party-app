@@ -8,19 +8,33 @@ import getFieldError from '../forms/getFieldError';
 import useFormSubmitHandler from '../forms/useFormSubmitHandler';
 import { registerUser } from '../requests';
 
+const requiredTrimmedValidator = (fieldName) => ({
+  onChange: ({ value }) => {
+    if (!value.trim()) {
+      return `${fieldName} is required.`;
+    }
+    return undefined;
+  },
+  onSubmit: ({ value }) => {
+    if (!value.trim()) {
+      return `${fieldName} is required.`;
+    }
+    return undefined;
+  },
+});
+
 const Register = () => {
   const router = useRouter();
   const [error, setError] = useState(null);
 
   const form = useForm({
     defaultValues: {
-      fullName: '',
+      firstName: '',
+      lastName: '',
       email: '',
       password: '',
       confirmPassword: '',
       referralCode: '',
-      country: 'Belgium',
-      language: 'English',
       agreePrivacy: false,
       subscribeNewsletter: false,
     },
@@ -28,9 +42,15 @@ const Register = () => {
       setError(null);
 
       try {
+        const firstName = value.firstName.trim();
+        const lastName = value.lastName.trim();
         const payload = {
           email: value.email,
           password: value.password,
+          userProfile: {
+            firstName,
+            lastName,
+          },
         };
         if (value.referralCode.trim()) {
           payload.referralCode = value.referralCode.trim().toUpperCase();
@@ -83,20 +103,44 @@ const Register = () => {
 
         <form className="space-y-6" id="register-form" onSubmit={handleSubmit}>
           <div className="space-y-4">
-            <form.Field name="fullName">
-              {(field) => (
-                <InputField
-                  label="Full Name"
-                  id="fullname"
-                  name="fullname"
-                  type="text"
-                  placeholder="Full Name"
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(event) => field.handleChange(event.target.value)}
-                />
-              )}
-            </form.Field>
+            <div className="flex gap-4">
+              <div className="w-1/2">
+                <form.Field name="firstName" validators={requiredTrimmedValidator('First name')}>
+                  {(field) => (
+                    <InputField
+                      label="First Name"
+                      id="first-name"
+                      name="first-name"
+                      type="text"
+                      placeholder="First Name"
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(event) => field.handleChange(event.target.value)}
+                      error={getFieldError(field.state.meta.errors)}
+                      required
+                    />
+                  )}
+                </form.Field>
+              </div>
+              <div className="w-1/2">
+                <form.Field name="lastName" validators={requiredTrimmedValidator('Last name')}>
+                  {(field) => (
+                    <InputField
+                      label="Last Name"
+                      id="last-name"
+                      name="last-name"
+                      type="text"
+                      placeholder="Last Name"
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(event) => field.handleChange(event.target.value)}
+                      error={getFieldError(field.state.meta.errors)}
+                      required
+                    />
+                  )}
+                </form.Field>
+              </div>
+            </div>
 
             <form.Field name="email">
               {(field) => (
@@ -186,84 +230,6 @@ const Register = () => {
                 />
               )}
             </form.Field>
-          </div>
-
-          <div className="h-px w-full bg-cusens-border my-6"></div>
-
-          <div className="space-y-4">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-cusens-text-secondary mb-2">
-              Preferences
-            </h2>
-            <form.Field name="country">
-              {(field) => (
-                <div className="relative">
-                  <select
-                    className="appearance-none block w-full px-4 py-3.5 bg-cusens-surface border border-cusens-border rounded-xl text-cusens-text-primary focus:outline-none focus:ring-2 focus:ring-cusens-primary focus:border-transparent transition-all"
-                    id="country"
-                    name="country"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(event) => field.handleChange(event.target.value)}
-                  >
-                    <option>Belgium</option>
-                    <option>France</option>
-                    <option>Germany</option>
-                    <option>Netherlands</option>
-                    <option>Spain</option>
-                    <option>Italy</option>
-                  </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-cusens-text-secondary">
-                    <span className="material-icons">expand_more</span>
-                  </div>
-                  <label
-                    className="absolute -top-2.5 left-3 px-1 bg-cusens-bg text-xs text-cusens-text-secondary"
-                    htmlFor="country"
-                  >
-                    Country
-                  </label>
-                </div>
-              )}
-            </form.Field>
-
-            <form.Field name="language">
-              {(field) => (
-                <div className="relative">
-                  <select
-                    className="appearance-none block w-full px-4 py-3.5 bg-cusens-surface border border-cusens-border rounded-xl text-cusens-text-primary focus:outline-none focus:ring-2 focus:ring-cusens-primary focus:border-transparent transition-all"
-                    id="language"
-                    name="language"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(event) => field.handleChange(event.target.value)}
-                  >
-                    <option>English</option>
-                    <option>Français</option>
-                    <option>Deutsch</option>
-                    <option>Nederlands</option>
-                  </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-cusens-text-secondary">
-                    <span className="material-icons">expand_more</span>
-                  </div>
-                  <label
-                    className="absolute -top-2.5 left-3 px-1 bg-cusens-bg text-xs text-cusens-text-secondary"
-                    htmlFor="language"
-                  >
-                    Language
-                  </label>
-                </div>
-              )}
-            </form.Field>
-          </div>
-
-          <div className="bg-cusens-green-light border border-cusens-green/20 p-4 rounded-xl flex gap-3 items-start mt-6">
-            <span className="material-icons text-cusens-green text-xl mt-0.5">verified_user</span>
-            <div>
-              <h3 className="text-xs font-bold text-cusens-green mb-1">Why we ask</h3>
-              <p className="text-xs text-cusens-text-secondary leading-relaxed">
-                We collect your country and language preferences to connect you with relevant local
-                initiatives and community discussions. We do not sell your data.
-              </p>
-            </div>
           </div>
 
           <div className="space-y-4 pt-2">
