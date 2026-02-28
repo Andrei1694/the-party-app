@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useForm, useStore } from '@tanstack/react-form';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../auth/AuthContext';
 import ImageCropDialog from '../components/image/ImageCropDialog';
 import ProfileEditTab from '../components/profile/ProfileEditTab';
 import ProfileImpactTab from '../components/profile/ProfileImpactTab';
 import useFormSubmitHandler from '../forms/useFormSubmitHandler';
+import { DEFAULT_STALE_TIME_MS } from '../queries/queryDefaults';
+import api, { endpoints } from '../requests';
 import {
   useFileUploadService,
   validateProfilePictureSourceFile,
@@ -23,6 +26,44 @@ const emptyForm = {
   cnp: '',
   sex: '',
   profilePictureUrl: '',
+};
+
+const DEFAULT_LEVEL = {
+  currentLevel: 1,
+  currentXP: 0,
+  nextLevelXP: 100,
+  progressPercent: 0,
+};
+
+const toNonNegativeInt = (value, fallback) => {
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue) || numericValue < 0) {
+    return fallback;
+  }
+  return Math.floor(numericValue);
+};
+
+const sanitizeLevelDto = (levelDto) => {
+  const currentLevel = Math.max(1, toNonNegativeInt(levelDto?.currentLevel, DEFAULT_LEVEL.currentLevel));
+  const currentXP = toNonNegativeInt(levelDto?.currentXP, DEFAULT_LEVEL.currentXP);
+  const nextLevelXP = Math.max(1, toNonNegativeInt(levelDto?.nextLevelXP, DEFAULT_LEVEL.nextLevelXP));
+  const inferredProgressPercent = Math.floor((currentXP * 100) / nextLevelXP);
+  const progressPercent = Math.min(
+    100,
+    Math.max(0, toNonNegativeInt(levelDto?.progressPercent, inferredProgressPercent)),
+  );
+
+  return {
+    currentLevel,
+    currentXP,
+    nextLevelXP,
+    progressPercent,
+  };
+};
+
+const fetchUserLevel = async (userId) => {
+  const { data } = await api.get(endpoints.usersLevel(userId));
+  return sanitizeLevelDto(data);
 };
 
 const getBackendErrorMessage = (error, fallbackMessage) => {
@@ -114,6 +155,38 @@ const Profile = () => {
   useEffect(() => {
     form.reset(mapProfileToFormValues(user?.userProfile), { keepDefaultValues: true });
   }, [form, user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const fallbackLevel = useMemo(() => {
+    if (user?.currentLevel == null && user?.currentXP == null && user?.nextLevelXP == null) {
+      return null;
+    }
+
+    return sanitizeLevelDto({
+      currentLevel: user?.currentLevel,
+      currentXP: user?.currentXP,
+      nextLevelXP: user?.nextLevelXP,
+    });
+  }, [user?.currentLevel, user?.currentXP, user?.nextLevelXP]);
+
+  const { data: levelFromApi, error: levelError, isLoading: isLevelLoading } = useQuery({
+    queryKey: ['users', user?.id, 'level'],
+    enabled: Boolean(user?.id),
+    staleTime: DEFAULT_STALE_TIME_MS,
+    queryFn: () => fetchUserLevel(user.id),
+  });
+
+  const resolvedLevel = levelFromApi || fallbackLevel || DEFAULT_LEVEL;
+  const hasFallbackLevel = Boolean(fallbackLevel);
+  const progressPercent = useMemo(() => {
+    const fallbackPercent =
+      resolvedLevel.nextLevelXP > 0 ? Math.floor((resolvedLevel.currentXP * 100) / resolvedLevel.nextLevelXP) : 0;
+    return Math.max(0, Math.min(100, toNonNegativeInt(resolvedLevel.progressPercent, fallbackPercent)));
+  }, [resolvedLevel.currentXP, resolvedLevel.nextLevelXP, resolvedLevel.progressPercent]);
+  const shouldShowLevelLoadingMessage = isLevelLoading && !hasFallbackLevel;
+  const shouldShowLevelErrorMessage = Boolean(levelError);
+  const levelErrorMessage = hasFallbackLevel
+    ? 'Live level data is temporarily unavailable. Showing your last known values.'
+    : 'Live level data is temporarily unavailable. Showing default values.';
 
   const formValues = useStore(form.store, (state) => state.values);
 
@@ -306,17 +379,25 @@ const Profile = () => {
             <p className="text-cusens-text-secondary text-xs font-semibold uppercase tracking-wide">Tap avatar to change photo</p>
             <div className="flex flex-col items-center justify-center">
               <p className="text-cusens-text-primary text-xl font-bold leading-tight text-center">{displayName}</p>
-              <p className="text-cusens-text-secondary text-sm font-medium text-center">Level 5 - Active Citizen</p>
+              <p className="text-cusens-text-secondary text-sm font-medium text-center">
+                Level {resolvedLevel.currentLevel}
+              </p>
               <p className="text-cusens-text-secondary text-sm font-medium text-center">{user?.code}</p>
             </div>
-            <div className="flex flex-col gap-2">
-              <div className="flex justify-between items-center">
+            <div className="w-full max-w-xs flex flex-col gap-2">
+              <div className="flex w-full justify-between items-center gap-3">
                 <p className="text-cusens-text-secondary text-xs font-semibold uppercase tracking-wide">Next Level</p>
-                <p className="text-cusens-text-primary text-sm font-bold">1200 / 2000 XP</p>
+                <p className="text-cusens-text-primary text-sm font-bold">
+                  {resolvedLevel.currentXP} / {resolvedLevel.nextLevelXP} XP
+                </p>
               </div>
               <div className="rounded-full bg-gray-200 h-2.5 shadow-inner">
-                <div className="h-full rounded-full bg-cusens-primary" style={{ width: '60%' }}></div>
+                <div className="h-full rounded-full bg-cusens-primary" style={{ width: `${progressPercent}%` }}></div>
               </div>
+              {shouldShowLevelLoadingMessage && (
+                <p className="text-xs text-cusens-text-secondary">Loading level data...</p>
+              )}
+              {shouldShowLevelErrorMessage && <p className="text-xs text-amber-700">{levelErrorMessage}</p>}
             </div>
             <div className="w-full max-w-xs text-center">
               {pictureStatusMessage && <p className="text-sm text-cusens-text-secondary">{pictureStatusMessage}</p>}

@@ -13,6 +13,7 @@ const api = axios.create({
 
 export const endpoints = {
   users: '/users',
+  usersLevel: (id) => `/users/${id}/level`,
   news: '/news',
   events: '/events',
   eventsJoined: '/events/joined',
