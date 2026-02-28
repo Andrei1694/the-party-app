@@ -58,10 +58,10 @@ const Login = () => {
   const handleSubmit = useFormSubmitHandler(form);
 
   return (
-    <div className="bg-cusens-bg font-display min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-sm mx-auto bg-cusens-surface rounded-3xl shadow-xl overflow-hidden border border-cusens-border relative">
-        <div className="px-8 pt-8 pb-10 flex flex-col h-full min-h-[600px]">
-          <div className="flex flex-col items-center justify-center mt-4 mb-10">
+    <div className="bg-cusens-bg font-display min-h-screen flex items-start sm:items-center justify-center px-3 py-6 sm:p-6">
+      <div className="w-full max-w-sm sm:max-w-md mx-auto bg-cusens-surface rounded-2xl sm:rounded-3xl shadow-xl overflow-hidden border border-cusens-border relative">
+        <div className="px-5 pt-6 pb-8 sm:px-8 sm:pt-8 sm:pb-10 flex flex-col sm:min-h-[600px]">
+          <div className="flex flex-col items-center justify-center mt-1 mb-7 sm:mt-4 sm:mb-10">
             <BrandLogo
               size="xl"
               className="flex-col gap-4 text-center"
@@ -70,7 +70,7 @@ const Login = () => {
             />
           </div>
 
-          <form className="space-y-5" onSubmit={handleSubmit}>
+          <form className="space-y-4 sm:space-y-5" onSubmit={handleSubmit}>
             <form.Field name="email">
               {(field) => (
                 <div className="group">
@@ -137,13 +137,13 @@ const Login = () => {
               )}
             </form.Field>
 
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
               {error ? (
-                <div className="text-red-600 text-xs font-medium" id="error-message">
+                <div className="flex-1 min-w-[140px] text-red-600 text-xs font-medium" id="error-message">
                   {error}
                 </div>
               ) : (
-                <div />
+                <div className="flex-1 min-w-[140px]" />
               )}
               <button
                 className="text-sm font-semibold text-cusens-text-secondary hover:text-cusens-primary ml-auto transition-colors"
@@ -165,24 +165,24 @@ const Login = () => {
               )}
             </form.Subscribe>
 
-            <div className="relative py-2">
+            {/* <div className="relative py-2">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-cusens-border"></div>
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="px-2 bg-cusens-surface text-cusens-text-secondary text-xs uppercase tracking-wide">Or</span>
               </div>
-            </div>
+            </div> */}
 
-            <button
+            {/* <button
               className="w-full flex justify-center py-3.5 px-4 border border-cusens-border rounded-xl shadow-sm text-sm font-semibold text-cusens-text-primary bg-cusens-surface hover:bg-cusens-bg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cusens-border transition-all duration-200"
               type="button"
             >
               Continue as Guest
-            </button>
+            </button> */}
           </form>
 
-          <div className="mt-auto pt-8 text-center">
+          <div className="mt-auto pt-6 sm:pt-8 text-center">
             <p className="text-sm text-cusens-text-secondary">
               New to CUSENS?
               <Link
@@ -192,7 +192,7 @@ const Login = () => {
                 Create Account
               </Link>
             </p>
-            <div className="mt-8 flex justify-center space-x-4">
+            <div className="mt-6 sm:mt-8 flex justify-center space-x-4">
               <span className="w-1 h-1 rounded-full bg-cusens-border"></span>
               <span className="w-1 h-1 rounded-full bg-cusens-border"></span>
               <span className="w-1 h-1 rounded-full bg-cusens-border"></span>
@@ -200,7 +200,7 @@ const Login = () => {
           </div>
         </div>
 
-        <div className="absolute bottom-2 left-0 right-0 flex justify-center pb-2 pointer-events-none">
+        <div className="absolute bottom-2 left-0 right-0 hidden sm:flex justify-center pb-2 pointer-events-none">
           <div className="w-32 h-1.5 bg-cusens-dark/20 rounded-full"></div>
         </div>
       </div>
