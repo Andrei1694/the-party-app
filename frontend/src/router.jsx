@@ -3,17 +3,20 @@ import {
   createRoute,
   createRouter,
 } from '@tanstack/react-router';
+import { lazy } from 'react';
 import App from './App';
 import ProtectedRoute from './auth/ProtectedRoute';
 import PublicOnlyRoute from './auth/PublicOnlyRoute';
 import RootRedirectRoute from './auth/RootRedirectRoute';
-import Login from './pages/Login';
-import News from './pages/News';
+import RouteSuspense from './components/RouteSuspense';
 import NewsArticle from './pages/NewsArticle';
-import Events from './pages/Events';
-import Register from './pages/Register';
-import Users from './pages/Users';
-import Profile from './pages/Profile';
+
+const Login = lazy(() => import('./pages/Login'));
+const News = lazy(() => import('./pages/News'));
+const Events = lazy(() => import('./pages/Events'));
+const Register = lazy(() => import('./pages/Register'));
+const Users = lazy(() => import('./pages/Users'));
+const Profile = lazy(() => import('./pages/Profile'));
 
 const rootRoute = createRootRoute({
   component: App,
@@ -29,9 +32,11 @@ const loginRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/login',
   component: () => (
-    <PublicOnlyRoute>
-      <Login />
-    </PublicOnlyRoute>
+    <RouteSuspense>
+      <PublicOnlyRoute>
+        <Login />
+      </PublicOnlyRoute>
+    </RouteSuspense>
   ),
 });
 
@@ -39,9 +44,11 @@ const newsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/news',
   component: () => (
-    <ProtectedRoute>
-      <News />
-    </ProtectedRoute>
+    <RouteSuspense>
+      <ProtectedRoute>
+        <News />
+      </ProtectedRoute>
+    </RouteSuspense>
   ),
 });
 
@@ -59,25 +66,33 @@ const eventsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/events',
   component: () => (
-    <ProtectedRoute>
-      <Events />
-    </ProtectedRoute>
+    <RouteSuspense>
+      <ProtectedRoute>
+        <Events />
+      </ProtectedRoute>
+    </RouteSuspense>
   ),
 });
 
 const registerRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/register',
-  component: Register,
+  component: () => (
+    <RouteSuspense>
+      <Register />
+    </RouteSuspense>
+  ),
 });
 
 const usersRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/users',
   component: () => (
-    <ProtectedRoute>
-      <Users />
-    </ProtectedRoute>
+    <RouteSuspense>
+      <ProtectedRoute>
+        <Users />
+      </ProtectedRoute>
+    </RouteSuspense>
   ),
 });
 
@@ -85,9 +100,11 @@ const profileRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/profile',
   component: () => (
-    <ProtectedRoute>
-      <Profile />
-    </ProtectedRoute>
+    <RouteSuspense>
+      <ProtectedRoute>
+        <Profile />
+      </ProtectedRoute>
+    </RouteSuspense>
   ),
 });
 
