@@ -8,7 +8,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import java.util.Collections;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
@@ -21,6 +20,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         logger.debug("Loading Spring Security user by email {}", maskEmail(email));
         User user = userRepository.findByEmail(email)
@@ -30,7 +30,14 @@ public class CustomUserDetailsService implements UserDetailsService {
                 });
 
         logger.debug("Loaded Spring Security user {}", user.getId());
-        return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), Collections.emptyList());
+
+        java.util.Collection<? extends org.springframework.security.core.GrantedAuthority> authorities = user.getRoles()
+                .stream()
+                .map(role -> new org.springframework.security.core.authority.SimpleGrantedAuthority(
+                        "ROLE_" + role.getRole().name()))
+                .toList();
+
+        return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), authorities);
     }
 
     private String maskEmail(String email) {
