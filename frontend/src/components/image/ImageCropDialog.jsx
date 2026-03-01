@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import Cropper from 'react-easy-crop';
 
 const MIN_ZOOM = 1;
@@ -34,13 +34,21 @@ const ImageCropDialog = ({
     };
   }, [isProcessing, onCancel, open]);
 
-  const handleConfirm = () => {
+  const handleConfirm = useCallback(() => {
     if (!cropAreaPixels || isProcessing) {
       return;
     }
 
     onConfirm?.(cropAreaPixels);
-  };
+  }, [cropAreaPixels, isProcessing, onConfirm]);
+
+  const handleCropComplete = useCallback((_, areaPixels) => {
+    setCropAreaPixels(areaPixels);
+  }, []);
+
+  const handleZoomInputChange = useCallback((event) => {
+    setZoom(Number(event.target.value));
+  }, []);
 
   if (!open || !imageSrc) {
     return null;
@@ -82,7 +90,7 @@ const ImageCropDialog = ({
               showGrid={false}
               onCropChange={setCrop}
               onZoomChange={setZoom}
-              onCropComplete={(_, areaPixels) => setCropAreaPixels(areaPixels)}
+              onCropComplete={handleCropComplete}
             />
           </div>
 
@@ -98,7 +106,7 @@ const ImageCropDialog = ({
                 max={MAX_ZOOM}
                 step={ZOOM_STEP}
                 value={zoom}
-                onChange={(event) => setZoom(Number(event.target.value))}
+                onChange={handleZoomInputChange}
                 disabled={isProcessing}
                 className="h-2 w-full cursor-pointer appearance-none rounded-full bg-cusens-border accent-cusens-primary disabled:cursor-not-allowed"
               />
@@ -129,4 +137,4 @@ const ImageCropDialog = ({
   );
 };
 
-export default ImageCropDialog;
+export default memo(ImageCropDialog);

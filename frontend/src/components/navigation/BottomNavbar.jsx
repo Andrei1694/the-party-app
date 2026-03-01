@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { isPathActive } from '../../util';
 
 const BottomNavbar = ({ navItems, currentPath, onNavigate }) => {
@@ -33,4 +34,4 @@ const BottomNavbar = ({ navItems, currentPath, onNavigate }) => {
   );
 };
 
-export default BottomNavbar;
+export default memo(BottomNavbar);

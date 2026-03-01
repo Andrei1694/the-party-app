@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useForm, useStore } from '@tanstack/react-form';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../auth/AuthContext';
@@ -61,6 +61,7 @@ const Profile = () => {
   const [isProcessingPicture, setIsProcessingPicture] = useState(false);
   const [activeTab, setActiveTab] = useState('edit');
   const fileUploadMutation = useFileUploadService();
+  const { isPending: isUploadingPicture, mutateAsync: uploadProfilePicture } = fileUploadMutation;
 
   const form = useForm({
     defaultValues: emptyForm,
@@ -136,7 +137,6 @@ const Profile = () => {
   }, [formValues.firstName, formValues.lastName, user?.email]);
 
   const avatarUrl = formValues.profilePictureUrl.trim() || DEFAULT_AVATAR_URL;
-  const isUploadingPicture = fileUploadMutation.isPending;
   const isPictureActionPending = isProcessingPicture || isUploadingPicture || isPersistingUploadedPicture;
   const pictureStatusMessage = isProcessingPicture
     ? 'Preparing profile picture...'
@@ -146,22 +146,22 @@ const Profile = () => {
         ? 'Saving profile picture...'
         : '';
 
-  const resetPictureFeedback = () => {
+  const resetPictureFeedback = useCallback(() => {
     setError('');
     setSuccess('');
     setUploadError('');
     setUploadSuccess('');
     setIsPersistingUploadedPicture(false);
-  };
+  }, []);
 
-  const clearPendingSourceImage = () => {
+  const clearPendingSourceImage = useCallback(() => {
     if (pendingSourceImageUrlRef.current) {
       URL.revokeObjectURL(pendingSourceImageUrlRef.current);
       pendingSourceImageUrlRef.current = '';
     }
     setPendingSourceImageUrl('');
     setPendingSourceFile(null);
-  };
+  }, []);
 
   const setPendingSourceImage = (selectedFile) => {
     const sourceImageUrl = URL.createObjectURL(selectedFile);
@@ -204,69 +204,80 @@ const Profile = () => {
     }
   };
 
-  const handleCropDialogCancel = () => {
+  const handleCropDialogCancel = useCallback(() => {
     if (isProcessingPicture) {
       return;
     }
 
     setIsCropDialogOpen(false);
     clearPendingSourceImage();
-  };
+  }, [clearPendingSourceImage, isProcessingPicture]);
 
-  const handleCropDialogConfirm = async (cropAreaPixels) => {
-    if (!pendingSourceFile) {
-      return;
-    }
+  const handleCropDialogConfirm = useCallback(
+    async (cropAreaPixels) => {
+      if (!pendingSourceFile) {
+        return;
+      }
 
-    resetPictureFeedback();
-    setIsProcessingPicture(true);
+      resetPictureFeedback();
+      setIsProcessingPicture(true);
 
-    let processedFile = null;
+      let processedFile = null;
 
-    try {
-      processedFile = await processImageForUpload({
-        file: pendingSourceFile,
-        cropAreaPixels,
-      });
-    } catch (processingFailure) {
-      setUploadError(
-        getApiErrorMessage(
-          processingFailure,
-          'Could not process profile picture. Please try a different image.',
-        ),
-      );
+      try {
+        processedFile = await processImageForUpload({
+          file: pendingSourceFile,
+          cropAreaPixels,
+        });
+      } catch (processingFailure) {
+        setUploadError(
+          getApiErrorMessage(
+            processingFailure,
+            'Could not process profile picture. Please try a different image.',
+          ),
+        );
+        setIsProcessingPicture(false);
+        setIsCropDialogOpen(false);
+        clearPendingSourceImage();
+        return;
+      }
+
       setIsProcessingPicture(false);
       setIsCropDialogOpen(false);
       clearPendingSourceImage();
-      return;
-    }
 
-    setIsProcessingPicture(false);
-    setIsCropDialogOpen(false);
-    clearPendingSourceImage();
-
-    try {
-      const { fileUrl } = await fileUploadMutation.mutateAsync(processedFile);
-      form.setFieldValue('profilePictureUrl', fileUrl);
-
-      setIsPersistingUploadedPicture(true);
       try {
-        await updateProfile(buildProfileUpdatePayloadFromProfile(user?.userProfile, fileUrl));
-        setUploadSuccess('Profile picture updated successfully.');
-      } catch (persistError) {
-        setUploadError(
-          getApiErrorMessage(
-            persistError,
-            'Profile picture uploaded, but profile update failed. Please try again.',
-          ),
-        );
-      } finally {
-        setIsPersistingUploadedPicture(false);
+        const { fileUrl } = await uploadProfilePicture(processedFile);
+        form.setFieldValue('profilePictureUrl', fileUrl);
+
+        setIsPersistingUploadedPicture(true);
+        try {
+          await updateProfile(buildProfileUpdatePayloadFromProfile(user?.userProfile, fileUrl));
+          setUploadSuccess('Profile picture updated successfully.');
+        } catch (persistError) {
+          setUploadError(
+            getApiErrorMessage(
+              persistError,
+              'Profile picture uploaded, but profile update failed. Please try again.',
+            ),
+          );
+        } finally {
+          setIsPersistingUploadedPicture(false);
+        }
+      } catch (uploadFailure) {
+        setUploadError(getApiErrorMessage(uploadFailure, 'Could not upload profile picture. Please try again.'));
       }
-    } catch (uploadFailure) {
-      setUploadError(getApiErrorMessage(uploadFailure, 'Could not upload profile picture. Please try again.'));
-    }
-  };
+    },
+    [
+      clearPendingSourceImage,
+      form,
+      pendingSourceFile,
+      resetPictureFeedback,
+      uploadProfilePicture,
+      updateProfile,
+      user?.userProfile,
+    ],
+  );
 
   const handleAvatarClick = () => {
     if (isPictureActionPending) {

@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import BrandLogo from '../BrandLogo';
 import { isPathActive } from '../../util';
 
@@ -72,4 +73,4 @@ const TopNavbar = ({
   );
 };
 
-export default TopNavbar;
+export default memo(TopNavbar);

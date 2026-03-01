@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { getFieldError } from '../../util';
 
 const cnpRegex = /^\d{13}$/;
@@ -234,4 +235,4 @@ const ProfileEditTab = ({
   );
 };
 
-export default ProfileEditTab;
+export default memo(ProfileEditTab);

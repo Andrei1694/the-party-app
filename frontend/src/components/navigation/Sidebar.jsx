@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { isPathActive } from '../../util';
 import BrandLogo from '../BrandLogo';
 
@@ -80,4 +81,4 @@ const Sidebar = ({ navItems, currentPath, onNavigate, onLogout, mobile, open, on
   );
 };
 
-export default Sidebar;
+export default memo(Sidebar);

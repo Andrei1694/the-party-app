@@ -1,3 +1,5 @@
+import { memo } from 'react';
+
 const ProfileImpactTab = () => {
   return (
     <section
@@ -133,4 +135,4 @@ const ProfileImpactTab = () => {
   );
 };
 
-export default ProfileImpactTab;
+export default memo(ProfileImpactTab);

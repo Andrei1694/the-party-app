@@ -30,12 +30,20 @@ const MobileLayout = ({
     await onLogout();
   }, [onLogout]);
 
+  const handleOpenSidebar = useCallback(() => {
+    setMobileSidebarOpen(true);
+  }, []);
+
+  const handleCloseSidebar = useCallback(() => {
+    setMobileSidebarOpen(false);
+  }, []);
+
   return (
     <div className="min-h-screen bg-cusens-bg">
       <div className="flex min-h-screen flex-1 flex-col font-display">
         <TopNavbar
           title={title}
-          onMenuClick={() => setMobileSidebarOpen(true)}
+          onMenuClick={handleOpenSidebar}
           userLabel={userLabel}
           userAvatarUrl={userAvatarUrl}
           onProfileClick={onProfileClick}
@@ -51,7 +59,7 @@ const MobileLayout = ({
         onLogout={handleLogout}
         mobile
         open={mobileSidebarOpen}
-        onClose={() => setMobileSidebarOpen(false)}
+        onClose={handleCloseSidebar}
       />
     </div>
   );
