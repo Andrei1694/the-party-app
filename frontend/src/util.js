@@ -22,6 +22,13 @@ const DEFAULT_IMAGE_OPTIONS = {
 const INITIAL_QUALITY = 0.92;
 const QUALITY_STEP = 0.08;
 const DIMENSION_STEP = 0.9;
+const DATE_TIME_FORMATTER = new Intl.DateTimeFormat('en-US', {
+  year: 'numeric',
+  month: 'short',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+});
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
@@ -206,13 +213,7 @@ export const formatDateTime = (value) => {
     return 'Date not available';
   }
 
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date);
+  return DATE_TIME_FORMATTER.format(date);
 };
 
 export const getEventStatus = (startTime, endTime) => {

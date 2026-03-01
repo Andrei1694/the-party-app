@@ -1,30 +1,4 @@
-# Frontend Optimisation Audit
 
-No code changes made. Biggest optimization opportunities:
-
-1. High: Route bundle is not split, so all page components ship on first load.  
-Refs: `frontend/src/router.jsx:6`, `frontend/src/router.jsx:10`.  
-Evidence: `npm run build` outputs one JS bundle: `dist/assets/index-*.js` at `482.89 kB` (`148.54 kB` gzip).  
-Target components: `News`, `Events`, `Profile`, `Users`, `Login`, `Register`.
-
-2. High: Auth gating creates a fetch waterfall on protected pages (`/auth/me` first, page data second).  
-Refs: `frontend/src/auth/AuthContext.jsx:20`, `frontend/src/auth/ProtectedRoute.jsx:8`, `frontend/src/pages/News.jsx:23`.
-
-3. High: `Profile` re-renders the full screen on every form keystroke due to broad form-store subscription.  
-Ref: `frontend/src/pages/Profile.jsx:128`.  
-This affects the whole component tree under `Profile` (avatar, tabs, level section, etc.).
-
-4. Medium: `Profile` eagerly pulls image-cropping stack (`react-easy-crop`) instead of loading only when user edits avatar.  
-Refs: `frontend/src/pages/Profile.jsx:5`, `frontend/src/components/image/ImageCropDialog.jsx:2`.
-
-5. Medium: Font/icon payload is heavy and duplicated (multiple Google font families + Material Icons font).  
-Refs: `frontend/index.html:7`, `frontend/index.html:9`, `frontend/src/index.css:1`.
-
-6. Medium: `Events` does repeated expensive date formatter construction during list rendering.  
-Refs: `frontend/src/util.js:202`, `frontend/src/pages/Events.jsx:131`.
-
-7. Medium: `ProfileImpactTab` uses multiple remote background images without lazy image loading behavior.  
-Refs: `frontend/src/components/profile/ProfileImpactTab.jsx:37`, `frontend/src/components/profile/ProfileImpactTab.jsx:43`.
 
 8. Low: Unused dependency in frontend package (`react-router-dom`), which adds install/maintenance overhead.  
 Ref: `frontend/package.json:20`.

@@ -1,8 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useForm, useStore } from '@tanstack/react-form';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../auth/AuthContext';
-import ImageCropDialog from '../components/image/ImageCropDialog';
 import ProfileEditTab from '../components/profile/ProfileEditTab';
 import ProfileImpactTab from '../components/profile/ProfileImpactTab';
 import useFormSubmitHandler from '../forms/useFormSubmitHandler';
@@ -40,6 +39,8 @@ const DEFAULT_LEVEL = {
   nextLevelXP: 100,
   progressPercent: 0,
 };
+
+const ImageCropDialog = lazy(() => import('../components/image/ImageCropDialog'));
 
 const fetchUserLevel = async (userId) => {
   const { data } = await api.get(endpoints.usersLevel(userId));
@@ -412,14 +413,28 @@ const Profile = () => {
         </main>
       </div>
       {isCropDialogOpen && (
-        <ImageCropDialog
-          open={isCropDialogOpen}
-          imageSrc={pendingSourceImageUrl}
-          aspect={1}
-          isProcessing={isProcessingPicture}
-          onCancel={handleCropDialogCancel}
-          onConfirm={handleCropDialogConfirm}
-        />
+        <Suspense
+          fallback={(
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
+              <div
+                role="status"
+                aria-live="polite"
+                className="rounded-xl bg-cusens-surface px-4 py-3 text-sm font-semibold text-cusens-text-primary shadow-xl"
+              >
+                Loading image editor...
+              </div>
+            </div>
+          )}
+        >
+          <ImageCropDialog
+            open={isCropDialogOpen}
+            imageSrc={pendingSourceImageUrl}
+            aspect={1}
+            isProcessing={isProcessingPicture}
+            onCancel={handleCropDialogCancel}
+            onConfirm={handleCropDialogConfirm}
+          />
+        </Suspense>
       )}
     </div>
   );

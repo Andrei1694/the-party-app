@@ -56,6 +56,14 @@ const Events = () => {
   });
 
   const joinedEventIdSet = useMemo(() => new Set(joinedEventIds), [joinedEventIds]);
+  const eventsWithFormattedStart = useMemo(
+    () =>
+      events.map((event) => ({
+        ...event,
+        formattedStartsAt: formatDateTime(event.startsAt),
+      })),
+    [events],
+  );
 
   const joinEventMutation = useMutation({
     mutationFn: async (eventId) => {
@@ -126,9 +134,9 @@ const Events = () => {
           <AsyncStateCard message="No events are available right now." />
         )}
 
-        {!isLoading && !error && events.length > 0 && (
+        {!isLoading && !error && eventsWithFormattedStart.length > 0 && (
           <div className="grid gap-4 md:grid-cols-2">
-            {events.map((event) => {
+            {eventsWithFormattedStart.map((event) => {
               const isJoined = joinedEventIdSet.has(event.id);
               const isClosed = event.status === 'Closed';
               const isJoiningCurrent = joinEventMutation.isPending && joinEventMutation.variables === event.id;
@@ -155,7 +163,7 @@ const Events = () => {
                   <div className="mt-4 space-y-2 text-sm text-cusens-text-secondary">
                     <p className="flex items-center gap-2">
                       <span className="material-icons text-[18px] text-cusens-primary">schedule</span>
-                      <span>{formatDateTime(event.startsAt)}</span>
+                      <span>{event.formattedStartsAt}</span>
                     </p>
                     <p className="flex items-center gap-2">
                       <span className="material-icons text-[18px] text-cusens-primary">place</span>

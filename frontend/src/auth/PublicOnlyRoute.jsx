@@ -2,13 +2,13 @@ import { Navigate } from '@tanstack/react-router';
 import { useAuth } from './AuthContext';
 
 const PublicOnlyRoute = ({ children }) => {
-  const { user, isLoading } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
     return <div>Checking session...</div>;
   }
 
-  if (user) {
+  if (isAuthenticated) {
     return <Navigate to="/news" replace />;
   }
 

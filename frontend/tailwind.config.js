@@ -28,7 +28,7 @@ export default {
       fontFamily: {
         sans: ['"Open Sans"', "Arial", "sans-serif"],
         heading: ["Montserrat", '"Open Sans"', "sans-serif"],
-        display: ["Exo", '"Open Sans"', "sans-serif"],
+        display: ["Montserrat", '"Open Sans"', "sans-serif"],
       },
       borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
     },
