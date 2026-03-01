@@ -126,17 +126,19 @@ const Profile = () => {
     ? 'Live level data is temporarily unavailable. Showing your last known values.'
     : 'Live level data is temporarily unavailable. Showing default values.';
 
-  const formValues = useStore(form.store, (state) => state.values);
+  const firstName = useStore(form.store, (state) => state.values.firstName);
+  const lastName = useStore(form.store, (state) => state.values.lastName);
+  const profilePictureUrl = useStore(form.store, (state) => state.values.profilePictureUrl);
 
   const displayName = useMemo(() => {
-    const fullName = `${formValues.firstName} ${formValues.lastName}`.trim();
+    const fullName = `${firstName} ${lastName}`.trim();
     if (fullName) {
       return fullName;
     }
     return user?.email || 'Profile';
-  }, [formValues.firstName, formValues.lastName, user?.email]);
+  }, [firstName, lastName, user?.email]);
 
-  const avatarUrl = formValues.profilePictureUrl.trim() || DEFAULT_AVATAR_URL;
+  const avatarUrl = profilePictureUrl.trim() || DEFAULT_AVATAR_URL;
   const isPictureActionPending = isProcessingPicture || isUploadingPicture || isPersistingUploadedPicture;
   const pictureStatusMessage = isProcessingPicture
     ? 'Preparing profile picture...'
