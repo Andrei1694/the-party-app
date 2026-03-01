@@ -42,7 +42,8 @@ const LazyAchievementImage = memo(({ src, alt }) => {
     }
 
     if (typeof IntersectionObserver !== 'function') {
-      setIsVisible(true);
+      // Avoid calling setState synchronously during render
+      queueMicrotask(() => setIsVisible(true));
       return undefined;
     }
 
