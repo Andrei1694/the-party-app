@@ -16,6 +16,12 @@
 - `npm run preview` serves the production build locally.
 - `npm run lint` runs ESLint across the project.
 
+## Java SDK Version (Backend Integration)
+
+- If you hit Java version mismatch errors while working in this repo, switch SDKMAN Java to:
+  `sdk use java 17.0.18-amzn`
+- The repository also includes a root `.sdkmanrc`; run `sdk env` from the repository root to auto-apply it.
+
 ## Coding Style & Naming Conventions
 
 - Use 2-space indentation, semicolons, and single quotes (match existing `*.jsx`).
