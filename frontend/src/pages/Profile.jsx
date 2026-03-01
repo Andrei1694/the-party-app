@@ -284,10 +284,10 @@ const Profile = () => {
   const isImpactTabActive = activeTab === 'impact';
 
   return (
-    <div className="bg-cusens-bg font-display flex items-start justify-center">
-      <div className="w-full max-w-md bg-cusens-surface rounded-3xl shadow-xl overflow-hidden border border-cusens-border relative flex flex-col">
-        <main className="flex-1 overflow-y-auto px-6 pb-24 pt-6">
-          <div className="flex flex-col items-center gap-4">
+    <div className="bg-cusens-bg font-display flex items-start justify-center lg:px-6 lg:py-6 xl:px-10">
+      <div className="w-full max-w-md lg:max-w-4xl xl:max-w-5xl bg-cusens-surface rounded-3xl shadow-xl overflow-hidden border border-cusens-border relative flex flex-col">
+        <main className="flex-1 overflow-y-auto px-6 pb-24 pt-6 lg:px-10 lg:pb-12 lg:pt-8">
+          <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-4 lg:gap-5">
             <input
               ref={profilePictureInputRef}
               id="profilePictureFile"
@@ -321,7 +321,7 @@ const Profile = () => {
               </p>
               <p className="text-cusens-text-secondary text-sm font-medium text-center">{user?.code}</p>
             </div>
-            <div className="w-full max-w-xs flex flex-col gap-2">
+            <div className="w-full max-w-xs lg:max-w-md flex flex-col gap-2">
               <div className="flex w-full justify-between items-center gap-3">
                 <p className="text-cusens-text-secondary text-xs font-semibold uppercase tracking-wide">Next Level</p>
                 <p className="text-cusens-text-primary text-sm font-bold">
@@ -336,14 +336,14 @@ const Profile = () => {
               )}
               {shouldShowLevelErrorMessage && <p className="text-xs text-amber-700">{levelErrorMessage}</p>}
             </div>
-            <div className="w-full max-w-xs text-center">
+            <div className="w-full max-w-xs lg:max-w-md text-center">
               {pictureStatusMessage && <p className="text-sm text-cusens-text-secondary">{pictureStatusMessage}</p>}
               {uploadError && <p className="text-sm text-red-600">{uploadError}</p>}
               {uploadSuccess && <p className="text-sm text-green-600">{uploadSuccess}</p>}
             </div>
           </div>
 
-          <div className="pt-6">
+          <div className="mx-auto w-full max-w-3xl pt-6 lg:pt-8">
             <div
               role="tablist"
               aria-label="Profile sections"
@@ -382,18 +382,20 @@ const Profile = () => {
             </div>
           </div>
 
-          {isEditTabActive ? (
-            <ProfileEditTab
-              form={form}
-              handleSubmit={handleSubmit}
-              inputClassName={inputClassName}
-              error={error}
-              success={success}
-              isPictureActionPending={isPictureActionPending}
-            />
-          ) : (
-            <ProfileImpactTab />
-          )}
+          <div className="mx-auto w-full max-w-3xl">
+            {isEditTabActive ? (
+              <ProfileEditTab
+                form={form}
+                handleSubmit={handleSubmit}
+                inputClassName={inputClassName}
+                error={error}
+                success={success}
+                isPictureActionPending={isPictureActionPending}
+              />
+            ) : (
+              <ProfileImpactTab />
+            )}
+          </div>
         </main>
       </div>
       {isCropDialogOpen && (

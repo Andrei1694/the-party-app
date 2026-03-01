@@ -14,15 +14,15 @@ const ProfileEditTab = ({
 
   return (
     <section
-      className="pt-6"
+      className="pt-6 lg:pt-8"
       role="tabpanel"
       id="profile-panel-edit"
       aria-labelledby="profile-tab-edit"
     >
       <h2 className="text-cusens-text-primary text-lg font-bold leading-tight tracking-tight mb-4">Edit Profile</h2>
 
-      <form className="space-y-4" onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <form className="space-y-4 lg:space-y-5" onSubmit={handleSubmit}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-4">
           <Form.Field name="firstName">
             {(field) => (
               <div>
@@ -64,7 +64,7 @@ const ProfileEditTab = ({
           </Form.Field>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-4">
           <Form.Field name="telefon">
             {(field) => (
               <div>
@@ -105,7 +105,7 @@ const ProfileEditTab = ({
           </Form.Field>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-4">
           <Form.Field name="sex">
             {(field) => (
               <div>
