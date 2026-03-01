@@ -12,6 +12,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserProfileDto implements Serializable {
+	private static final long serialVersionUID = 1L;
+
 	private Long id;
 	private String cnp;
 	private Character sex;
