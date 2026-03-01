@@ -4,26 +4,7 @@ import { Link, useNavigate, useRouter, useSearch } from '@tanstack/react-router'
 import { useAuth } from '../auth/AuthContext';
 import useFormSubmitHandler from '../forms/useFormSubmitHandler';
 import BrandLogo from '../components/BrandLogo';
-
-const isSafeInternalRedirect = (redirectPath) => {
-  if (typeof redirectPath !== 'string' || !redirectPath.startsWith('/') || redirectPath.startsWith('//')) {
-    return false;
-  }
-
-  try {
-    const pathname = new URL(redirectPath, 'http://localhost').pathname;
-    if (pathname === '/login' || pathname.startsWith('/login/')) {
-      return false;
-    }
-    if (pathname === '/register' || pathname.startsWith('/register/')) {
-      return false;
-    }
-  } catch {
-    return false;
-  }
-
-  return true;
-};
+import { isSafeInternalRedirect } from '../util';
 
 const Login = () => {
   const { login } = useAuth();

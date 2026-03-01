@@ -1,4 +1,4 @@
-import isPathActive from '../../navigation/isPathActive';
+import { isPathActive } from '../../util';
 
 const BottomNavbar = ({ navItems, currentPath, onNavigate }) => {
   return (

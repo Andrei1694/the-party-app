@@ -1,4 +1,4 @@
-import isPathActive from '../../navigation/isPathActive';
+import { isPathActive } from '../../util';
 import BrandLogo from '../BrandLogo';
 
 const Sidebar = ({ navItems, currentPath, onNavigate, onLogout, mobile, open, onClose }) => {

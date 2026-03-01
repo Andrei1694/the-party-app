@@ -1,4 +1,4 @@
-import getFieldError from '../../forms/getFieldError';
+import { getFieldError } from '../../util';
 
 const cnpRegex = /^\d{13}$/;
 

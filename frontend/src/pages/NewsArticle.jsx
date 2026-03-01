@@ -5,13 +5,7 @@ import AsyncStateCard from '../components/feedback/AsyncStateCard';
 import PageFeedHeader from '../components/layout/PageFeedHeader';
 import { DEFAULT_STALE_TIME_MS } from '../queries/queryDefaults';
 import api, { endpoints } from '../requests';
-
-const getErrorMessage = (error) =>
-  error?.response?.data?.message ||
-  error?.response?.data?.detail ||
-  (typeof error?.response?.data === 'string' ? error.response.data : null) ||
-  error?.message ||
-  'Unexpected error while loading article.';
+import { getApiErrorMessage } from '../util';
 
 const fetchNewsById = async (newsId) => {
   const { data } = await api.get(endpoints.newsById(newsId));
@@ -82,7 +76,9 @@ const NewsArticle = () => {
       <section className="font-display">
         <div className="mx-auto w-full max-w-4xl rounded-3xl border border-red-200 bg-red-50 p-6">
           <p className="text-sm font-medium text-red-700">
-            {notFound ? `Article #${newsId} was not found.` : `Could not load article. ${getErrorMessage(error)}`}
+            {notFound
+              ? `Article #${newsId} was not found.`
+              : `Could not load article. ${getApiErrorMessage(error, 'Unexpected error while loading article.')}`}
           </p>
           <div className="mt-4 flex flex-wrap gap-3">
             <button

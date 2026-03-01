@@ -3,18 +3,9 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import AsyncStateCard from '../components/feedback/AsyncStateCard';
 import PageFeedHeader from '../components/layout/PageFeedHeader';
-import extractPaginatedContent from '../queries/extractPaginatedContent';
 import { DEFAULT_PAGE_SIZE, DEFAULT_STALE_TIME_MS } from '../queries/queryDefaults';
 import api, { endpoints } from '../requests';
-
-const getExcerpt = (text, maxLength = 220) => {
-  const normalized = (text || '').trim();
-  if (normalized.length <= maxLength) {
-    return normalized || 'No content available.';
-  }
-
-  return `${normalized.slice(0, maxLength).trimEnd()}...`;
-};
+import { extractPaginatedContent, getExcerpt } from '../util';
 
 const fetchNews = async () => {
   const { data } = await api.get(endpoints.news, {

@@ -2,72 +2,20 @@ import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import AsyncStateCard from '../components/feedback/AsyncStateCard';
 import PageFeedHeader from '../components/layout/PageFeedHeader';
-import extractPaginatedContent from '../queries/extractPaginatedContent';
 import { DEFAULT_PAGE_SIZE, DEFAULT_STALE_TIME_MS } from '../queries/queryDefaults';
 import api, { endpoints } from '../requests';
-
-const DEFAULT_CATEGORY = 'Community';
+import {
+  extractJoinedEventIds,
+  extractPaginatedContent,
+  formatDateTime,
+  mapBackendEvent,
+} from '../util';
 
 const statusClassByLabel = {
   Upcoming: 'bg-cusens-primary/10 text-cusens-primary',
   Open: 'bg-green-100 text-green-700',
   Closed: 'bg-gray-200 text-gray-700',
 };
-
-const formatDateTime = (value) => {
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return 'Date not available';
-  }
-
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date);
-};
-
-const getEventStatus = (startTime, endTime) => {
-  const now = Date.now();
-  const start = new Date(startTime).getTime();
-  const end = new Date(endTime).getTime();
-
-  if (Number.isNaN(start) && Number.isNaN(end)) {
-    return 'Closed';
-  }
-
-  if (!Number.isNaN(start) && now < start) {
-    return 'Upcoming';
-  }
-
-  if (!Number.isNaN(start) && Number.isNaN(end)) {
-    return 'Open';
-  }
-
-  if (!Number.isNaN(start) && !Number.isNaN(end) && now >= start && now <= end) {
-    return 'Open';
-  }
-
-  if (Number.isNaN(start) && !Number.isNaN(end) && now <= end) {
-    return 'Open';
-  }
-
-  return 'Closed';
-};
-
-const mapBackendEvent = (event) => ({
-  id: event.id,
-  title: event.name || 'Untitled event',
-  description: event.description || 'No description available.',
-  startsAt: event.startTime,
-  endsAt: event.endTime,
-  location: event.location || 'Location not specified',
-  category: DEFAULT_CATEGORY,
-  status: getEventStatus(event.startTime, event.endTime),
-});
 
 const fetchEvents = async () => {
   const { data } = await api.get(endpoints.events, {
@@ -79,14 +27,6 @@ const fetchEvents = async () => {
   });
 
   return extractPaginatedContent(data).map(mapBackendEvent);
-};
-
-const extractJoinedEventIds = (payload) => {
-  if (Array.isArray(payload)) {
-    return payload;
-  }
-
-  return [];
 };
 
 const fetchJoinedEventIds = async () => {

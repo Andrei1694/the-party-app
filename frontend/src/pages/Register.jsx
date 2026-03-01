@@ -4,24 +4,9 @@ import { Link, useRouter } from '@tanstack/react-router';
 import InputField from '../components/InputField';
 import Button from '../components/Button';
 import BrandLogo from '../components/BrandLogo';
-import getFieldError from '../forms/getFieldError';
 import useFormSubmitHandler from '../forms/useFormSubmitHandler';
 import { registerUser } from '../requests';
-
-const requiredTrimmedValidator = (fieldName) => ({
-  onChange: ({ value }) => {
-    if (!value.trim()) {
-      return `${fieldName} is required.`;
-    }
-    return undefined;
-  },
-  onSubmit: ({ value }) => {
-    if (!value.trim()) {
-      return `${fieldName} is required.`;
-    }
-    return undefined;
-  },
-});
+import { getFieldError, requiredTrimmedValidator } from '../util';
 
 const Register = () => {
   const router = useRouter();

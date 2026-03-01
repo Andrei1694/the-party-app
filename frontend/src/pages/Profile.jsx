@@ -8,11 +8,17 @@ import ProfileImpactTab from '../components/profile/ProfileImpactTab';
 import useFormSubmitHandler from '../forms/useFormSubmitHandler';
 import { DEFAULT_STALE_TIME_MS } from '../queries/queryDefaults';
 import api, { endpoints } from '../requests';
+import { useFileUploadService } from '../service/useFileUploadService';
 import {
-  useFileUploadService,
+  buildProfileUpdatePayloadFromProfile,
+  getApiErrorMessage,
+  mapProfileToFormValues,
+  normalizeOptional,
+  processImageForUpload,
+  sanitizeLevelDto,
+  toNonNegativeInt,
   validateProfilePictureSourceFile,
-} from '../service/useFileUploadService';
-import { processImageForUpload } from '../utils/image/processImageForUpload';
+} from '../util';
 
 const DEFAULT_AVATAR_URL = 'https://lh3.googleusercontent.com/aida-public/AB6AXuD7cbnwFcAoyOb5pOj744xfX7_cAy6Ugq1YRcDnUrEVaKSYqKlk4ZzDZw9sBVYTIHe_EBpEwhbBrT7l2rAcru-k3g_b8YkjAPWe_T42Hju-7OT_JINXzdE-jt0zyjKnnAIes_8YKHehNzLb-FExOKEGuhtu_gYOd2tjcvniKNxYzKjtTk9GWEessHgFR879XlRoXkoNIs0pzZMTSpRV7oIH5dogZfvbD8FEGA4CpkaLtBbAAyufOoeBrCe1-yxJfqJkycLR5BBaro8f';
 
@@ -35,79 +41,10 @@ const DEFAULT_LEVEL = {
   progressPercent: 0,
 };
 
-const toNonNegativeInt = (value, fallback) => {
-  const numericValue = Number(value);
-  if (!Number.isFinite(numericValue) || numericValue < 0) {
-    return fallback;
-  }
-  return Math.floor(numericValue);
-};
-
-const sanitizeLevelDto = (levelDto) => {
-  const currentLevel = Math.max(1, toNonNegativeInt(levelDto?.currentLevel, DEFAULT_LEVEL.currentLevel));
-  const currentXP = toNonNegativeInt(levelDto?.currentXP, DEFAULT_LEVEL.currentXP);
-  const nextLevelXP = Math.max(1, toNonNegativeInt(levelDto?.nextLevelXP, DEFAULT_LEVEL.nextLevelXP));
-  const inferredProgressPercent = Math.floor((currentXP * 100) / nextLevelXP);
-  const progressPercent = Math.min(
-    100,
-    Math.max(0, toNonNegativeInt(levelDto?.progressPercent, inferredProgressPercent)),
-  );
-
-  return {
-    currentLevel,
-    currentXP,
-    nextLevelXP,
-    progressPercent,
-  };
-};
-
 const fetchUserLevel = async (userId) => {
   const { data } = await api.get(endpoints.usersLevel(userId));
   return sanitizeLevelDto(data);
 };
-
-const getBackendErrorMessage = (error, fallbackMessage) => {
-  const backendMessage =
-    error?.response?.data?.message ||
-    error?.response?.data?.detail ||
-    (typeof error?.response?.data === 'string' ? error.response.data : null);
-
-  return backendMessage || error?.message || fallbackMessage;
-};
-
-const mapProfileToFormValues = (profile) => ({
-  firstName: profile?.firstName ?? '',
-  lastName: profile?.lastName ?? '',
-  telefon: profile?.telefon ?? '',
-  dateOfBirth: profile?.dateOfBirth ?? '',
-  address: profile?.address ?? '',
-  bio: profile?.bio ?? '',
-  cnp: profile?.cnp ?? '',
-  sex: profile?.sex ?? '',
-  profilePictureUrl: profile?.profilePictureUrl ?? '',
-});
-
-const normalizeOptional = (value) => {
-  if (value == null) {
-    return null;
-  }
-  const normalized = value.trim();
-  return normalized.length ? normalized : null;
-};
-
-const buildProfileUpdatePayloadFromProfile = (profile, profilePictureUrlOverride) => ({
-  firstName: normalizeOptional(profile?.firstName ?? ''),
-  lastName: normalizeOptional(profile?.lastName ?? ''),
-  telefon: normalizeOptional(profile?.telefon ?? ''),
-  dateOfBirth: profile?.dateOfBirth || null,
-  address: normalizeOptional(profile?.address ?? ''),
-  bio: normalizeOptional(profile?.bio ?? ''),
-  cnp: normalizeOptional(profile?.cnp ?? ''),
-  sex: profile?.sex || null,
-  profilePictureUrl: normalizeOptional(
-    profilePictureUrlOverride === undefined ? profile?.profilePictureUrl ?? '' : profilePictureUrlOverride,
-  ),
-});
 
 const Profile = () => {
   const { user, updateProfile } = useAuth();
@@ -147,7 +84,7 @@ const Profile = () => {
         });
         setSuccess('Profile updated successfully.');
       } catch (submitError) {
-        setError(getBackendErrorMessage(submitError, 'Could not update profile. Please try again.'));
+        setError(getApiErrorMessage(submitError, 'Could not update profile. Please try again.'));
       }
     },
   });
@@ -263,7 +200,7 @@ const Profile = () => {
     } catch (validationFailure) {
       clearPendingSourceImage();
       setIsCropDialogOpen(false);
-      setUploadError(getBackendErrorMessage(validationFailure, 'Could not process profile picture.'));
+      setUploadError(getApiErrorMessage(validationFailure, 'Could not process profile picture.'));
     }
   };
 
@@ -293,7 +230,7 @@ const Profile = () => {
       });
     } catch (processingFailure) {
       setUploadError(
-        getBackendErrorMessage(
+        getApiErrorMessage(
           processingFailure,
           'Could not process profile picture. Please try a different image.',
         ),
@@ -318,7 +255,7 @@ const Profile = () => {
         setUploadSuccess('Profile picture updated successfully.');
       } catch (persistError) {
         setUploadError(
-          getBackendErrorMessage(
+          getApiErrorMessage(
             persistError,
             'Profile picture uploaded, but profile update failed. Please try again.',
           ),
@@ -327,7 +264,7 @@ const Profile = () => {
         setIsPersistingUploadedPicture(false);
       }
     } catch (uploadFailure) {
-      setUploadError(getBackendErrorMessage(uploadFailure, 'Could not upload profile picture. Please try again.'));
+      setUploadError(getApiErrorMessage(uploadFailure, 'Could not upload profile picture. Please try again.'));
     }
   };
 
