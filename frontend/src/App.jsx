@@ -15,7 +15,7 @@ function App() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const isPhone = useIsPhone();
+  const isPhoneOrTablet = useIsPhone();
   const pathname = location.pathname;
   const showShell = isShellRoute(pathname, SHELL_ENABLED_PATHS);
   const title = getRouteTitle(pathname, SHELL_ENABLED_PATHS, ROUTE_TITLES);
@@ -56,7 +56,7 @@ function App() {
 
   const shellContent = <Outlet />;
 
-  if (isPhone) {
+  if (isPhoneOrTablet) {
     return (
       <MobileLayout
         title={title}

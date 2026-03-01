@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-const PHONE_MEDIA_QUERY = '(max-width: 767px)';
+const PHONE_MEDIA_QUERY = '(max-width: 1023px)';
 
 const getPhoneMatch = () => {
   if (typeof window === 'undefined') {

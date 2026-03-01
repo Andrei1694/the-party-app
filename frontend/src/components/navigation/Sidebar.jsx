@@ -3,8 +3,8 @@ import BrandLogo from '../BrandLogo';
 
 const Sidebar = ({ navItems, currentPath, onNavigate, onLogout, mobile, open, onClose }) => {
   const wrapperClassName = mobile
-    ? `fixed inset-0 z-40 md:hidden ${open ? '' : 'pointer-events-none'}`
-    : 'hidden w-72 shrink-0 border-r border-cusens-border bg-cusens-surface md:flex md:flex-col';
+    ? `fixed inset-0 z-40 lg:hidden ${open ? '' : 'pointer-events-none'}`
+    : 'hidden w-72 shrink-0 border-r border-cusens-border bg-cusens-surface lg:flex lg:flex-col';
 
   const panelClassName = mobile
     ? `relative flex h-full w-72 flex-col border-r border-cusens-border bg-cusens-surface shadow-xl transition-transform duration-300 ${
