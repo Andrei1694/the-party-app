@@ -37,7 +37,7 @@ src/main/java/com/party/ceva/demo/
 ├── controller/     # REST endpoints under /api
 ├── service/        # Business logic layer
 ├── repository/     # Spring Data JPA interfaces
-├── model/          # JPA entities
+├── model/          # JPA entities (User, Role, Event, EventParticipation, Level, News, UserProfile)
 ├── dto/            # Request/response objects
 └── config/         # Security, JWT filter, ModelMapper
 ```
@@ -47,13 +47,15 @@ src/main/java/com/party/ceva/demo/
 - JWT authentication via custom `JwtAuthenticationFilter` in security filter chain
 - DTOs separate from entities, mapped via ModelMapper
 - Redis caching with Spring @Cacheable
+- Role-based authorization: `/api/admin/**` requires `ROLE_ADMIN`; roles stored in `roles` table with `RoleTypes` enum (`ADMIN`, `SIMPATIZANT`, `MEMBRU`); authorities loaded dynamically from user roles
+- Maven compiler configured to retain parameter names (`-parameters` flag)
 
 ### Frontend Structure (React + Vite)
 ```
 frontend/src/
 ├── pages/          # Route-level components
 ├── components/     # Reusable UI components
-├── auth/           # AuthContext, route guards (ProtectedRoute, PublicOnlyRoute)
+├── auth/           # AuthContext, route guards (ProtectedRoute, PublicOnlyRoute, RootRedirectRoute)
 ├── queries/        # React Query hooks
 ├── forms/          # Form utilities
 ├── navigation/     # Routing configuration
@@ -62,9 +64,10 @@ frontend/src/
 
 **Key patterns:**
 - React Query (@tanstack/react-query) for server state
-- AuthContext provides useAuth() hook for auth state
-- Route protection via guard components
+- AuthContext provides useAuth() hook; uses explicit state management with initial loading handled before rendering routes
+- Route protection via guard components; `RootRedirectRoute` handles root path redirect
 - Vite proxies /api to backend at localhost:8080
+- Image crop dialog is lazy-loaded
 
 ## Key Configuration Files
 
@@ -72,6 +75,7 @@ frontend/src/
 - `frontend/vite.config.js` - Vite config with API proxy
 - `frontend/eslint.config.js` - ESLint rules
 - `docker-compose.yml` - Service orchestration
+- `.sdkmanrc` - Pins Java 17 (`17.0.18-amzn`); run `sdk env` from root to auto-apply
 
 ## Development Notes
 
@@ -81,10 +85,19 @@ frontend/src/
 - Components use PascalCase, hooks use useX pattern
 - Environment variables for frontend must be prefixed with `VITE_`
 - No frontend test framework configured yet; if adding, use Vitest + React Testing Library
+- Java version: 17 (Amazon Corretto `17.0.18-amzn`); if hitting version mismatch errors run `sdk env` from repo root
 
 ## Authentication Flow
 
 1. Backend issues JWT on successful login (`POST /api/auth/login`)
 2. Frontend stores token in localStorage via AuthContext
 3. Authenticated requests include token in Authorization header
-4. `JwtAuthenticationFilter` validates tokens in Spring Security chain
+4. `JwtAuthenticationFilter` validates tokens and loads user authorities from roles in Spring Security chain
+5. Admin-only endpoints live under `/api/admin/**` and require `ROLE_ADMIN`
+
+## Authorization
+
+- Roles are defined by the `RoleTypes` enum: `ADMIN`, `SIMPATIZANT`, `MEMBRU`
+- Each `Role` entity belongs to a `User` (ManyToOne) and can have `startDate`/`endDate` for time-scoped roles
+- Spring Security authorities are dynamically derived from the user's roles at login time
+- Public endpoints: `/api/auth/**`, `/api/users/register`, `/api/news` (GET), Swagger UI, `/uploads/**`
